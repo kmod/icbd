@@ -25,7 +25,7 @@ def usage():
 ICBD_DIR = os.path.abspath(os.path.dirname(__file__))
 
 if __name__ == "__main__":
-    optlist, args = getopt.getopt(sys.argv[1:], "I:o:p:n:c:E:", [])
+    optlist, args = getopt.getopt(sys.argv[1:], "I:o:p:nN:c:E:", [])
     if len(args) != 1:
         usage()
     [src_dir] = args
@@ -39,6 +39,7 @@ if __name__ == "__main__":
     output_dir = None
     prune_amount = None
     proj_name = None
+    do_output = True
     for n, v in optlist:
         if n == "-o":
             if output_dir is not None:
@@ -51,6 +52,8 @@ if __name__ == "__main__":
                 usage()
             prune_amount = int(v)
         elif n == "-n":
+            do_output = False
+        elif n == "-N":
             if proj_name is not None:
                 usage()
             proj_name = v
@@ -61,10 +64,14 @@ if __name__ == "__main__":
         else:
             raise Exception(n)
 
+    import random
+    random.seed(12345)
+
     if proj_name is None:
         proj_name = os.path.basename(src_dir)
     if prune_amount is None:
         prune_amount = 0
+
     if output_dir is None:
         output_dir = os.path.join("/tmp", "icbd_%s" % proj_name)
 
@@ -92,6 +99,9 @@ if __name__ == "__main__":
         for n in plugin_name.split('.')[1:]:
             m = getattr(m, n)
         m.load(e)
+
+    if do_output:
+        e.loadFormatter()
 
     for dirpath, dirnames, filenames in os.walk(src_dir, followlinks=True):
         if any(dirpath.startswith(d) for d in exclude_dirs):
@@ -146,6 +156,7 @@ if __name__ == "__main__":
     e.print_score(show_files=True, filter=lambda fn:fn.startswith(src_dir))
     print
 
-    for fn in e._loaded_modules:
-        output(fn)
+    if do_output:
+        for fn in e._loaded_modules:
+            output(fn)
 

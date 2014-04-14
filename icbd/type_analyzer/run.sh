@@ -26,6 +26,8 @@ elif [ "$NAME" = "demo" ]; then
     python -m icbd.type_analyzer.analyze_all $COMMON_OPTS demos
 elif [ "$NAME" = "icbd" ]; then
     python -m icbd.type_analyzer.analyze_all $COMMON_OPTS -I ~/icbd -E ~/icbd/icbd/type_analyzer/tests -E ~/icbd/icbd/compiler/benchmarks -E ~/icbd/icbd/compiler/tests -I stdlib/type_mocks ~/icbd/icbd
+elif [ "$NAME" = "bench" ]; then
+    python -m icbd.type_analyzer.analyze_all $COMMON_OPTS -I ~/icbd -E ~/icbd/icbd/type_analyzer/tests -E ~/icbd/icbd/compiler/benchmarks -E ~/icbd/icbd/compiler/tests -I stdlib/type_mocks -n ~/icbd/icbd
 else
     echo "No project set up with name '$NAME'"
 fi

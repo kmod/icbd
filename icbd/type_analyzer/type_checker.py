@@ -21,7 +21,7 @@ import re
 
 from icbd.util.graph_utils import get_scc
 from icbd.util.graph_tests import test_scc
-from icbd.type_analyzer.visualizer.annotate import annotate
+# from icbd.type_analyzer.visualizer.annotate import annotate
 
 from icbd.util import ast_utils
 from icbd.type_analyzer.builtins import (
@@ -1753,7 +1753,13 @@ class Engine(object):
             assert t.name == module_name, (t.name, module_name)
         return t
 
+    def loadFormatter(self):
+        # Just make sure it's importable
+        from icbd.type_analyzer.visualizer.annotate import annotate
+        annotate
+
     def format_html(self, fn, link_func, static_dir=None):
+        from icbd.type_analyzer.visualizer.annotate import annotate
         if PRETTY_DISPLAY:
             type_info = sorted((l,n,t.prettify().display()) for (l,n),(t,s) in self.annotations.get(fn, {}).iteritems())
         else:
