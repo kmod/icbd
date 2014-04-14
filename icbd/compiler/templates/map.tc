@@ -1,0 +1,29 @@
+$$(it = ListMT.make_list(input_type); it.initialize(em, "write"))
+$$(ot = ListMT.make_list(output_type); ot.initialize(em, "write"))
+$$(input_list = ListMT.get_name(input_type))
+$$(output_list = ListMT.get_name(output_type))
+$$(callable = CallableMT.make_callable([input_type], 0, output_type); callable.initialize(em, "write"))
+$$(callable_name = callable.name)
+
+$(output_list)* $(ot.get_ctor_name()[1:])();
+$(input_type.c_type()) $(input_list)_getitem($(input_list)*, i64);
+void $(output_list)_append($(output_list)*, $(output_type.c_type()));
+i64 $(it.get_method_name(em, "__len__"))($(input_list)*);
+
+$(output_type.c_type()) $(callable_name)_call1($(callable_name)*, $(input_type.c_type()));
+
+void $(output_type.get_method_name(em, "__decref__"))($(output_type.c_type()));
+void $(input_type.get_method_name(em, "__decref__"))($(input_type.c_type()));
+
+$(output_list)* $(name)($(callable_name)* f, $(input_list)* list) {
+    $(output_list)* rtn = $(ot.get_ctor_name()[1:])();
+    i64 n = $(input_list)_len(list);
+    for (int i = 0; i < n; i++) {
+        $(input_type.c_type()) e = $(input_list)_getitem(list, i);
+        $(output_type.c_type()) o = $(callable_name)_call1(f, e);
+        $(output_list)_append(rtn, o);
+        $(input_type.decref_c(em, 'e'));
+        $(output_type.decref_c(em, 'o'));
+    }
+    return rtn;
+}

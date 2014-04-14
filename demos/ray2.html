@@ -1,0 +1,4536 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Emscripten-Generated Code</title>
+    <style>
+      .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
+      canvas.emscripten { border: 1px solid black; }
+      textarea.emscripten { font-family: monospace; width: 80%; }
+      div.emscripten { text-align: center; }
+    </style>
+  </head>
+  <body>
+    <hr/>
+    <div class="emscripten" id="status">Downloading...</div>
+    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <hr/>
+    <div class="emscripten"><input type="button" value="fullscreen" onclick="Module.requestFullScreen()"></div>
+    <hr/>
+    <textarea class="emscripten" id="output" rows="8"></textarea>
+    <hr>
+    <script type='text/javascript'>
+      // connect to canvas
+      var Module = {
+        preRun: [],
+        postRun: [],
+        print: (function() {
+          var element = document.getElementById('output');
+          element.value = ''; // clear browser cache
+          return function(text) {
+            // These replacements are necessary if you render to raw HTML
+            //text = text.replace(/&/g, "&amp;");
+            //text = text.replace(/</g, "&lt;");
+            //text = text.replace(/>/g, "&gt;");
+            //text = text.replace('\n', '<br>', 'g');
+            element.value += text + "\n";
+            element.scrollTop = 99999; // focus on bottom
+          };
+        })(),
+        printErr: function(text) {
+          if (0) { // XXX disabled for safety typeof dump == 'function') {
+            dump(text + '\n'); // fast, straight to the real console
+          } else {
+            console.log(text);
+          }
+        },
+        canvas: document.getElementById('canvas'),
+        setStatus: function(text) {
+          if (Module.setStatus.interval) clearInterval(Module.setStatus.interval);
+          document.getElementById('status').innerHTML = text;
+          if (text) {
+            var counter = 0;
+            Module.setStatus.interval = setInterval(function() {
+              counter++;
+              counter %= 3;
+              var dots = ' ';
+              for (var i = 0; i < counter; i++) dots += '.';
+              dots += '*';
+              for (var i = counter; i < 2; i++) dots += '.';
+              document.getElementById('status').innerHTML = text.replace('...', dots);
+            }, 300);
+          }
+        },
+        totalDependencies: 0,
+        monitorRunDependencies: function(left) {
+          this.totalDependencies = Math.max(this.totalDependencies, left);
+          Module.setStatus(left ? 'Preparing: ' + (this.totalDependencies-left) + '/' + this.totalDependencies + '...' : 'All downloads complete.');
+        }
+      };
+      Module.setStatus('Downloading...');
+    </script>      
+    <script type='text/javascript'>
+
+      function a(b) {
+  throw b;
+}
+
+var ca = void 0, g = !0, l = null, m = !1;
+
+try {
+  this.Module = Module;
+} catch (ga) {
+  this.Module = Module = {};
+}
+
+var ja = "object" === typeof process, na = "object" === typeof window, Ea = "function" === typeof importScripts, Fa = !na && !ja && !Ea;
+
+if (ja) {
+  Module.print = (function(b) {
+    process.stdout.write(b + "\n");
+  });
+  Module.printErr = (function(b) {
+    process.stderr.write(b + "\n");
+  });
+  var Ga = require("fs"), La = require("path");
+  Module.read = (function(b) {
+    var b = La.normalize(b), d = Ga.readFileSync(b).toString();
+    !d && b != La.resolve(b) && (b = path.join(__dirname, "..", "src", b), d = Ga.readFileSync(b).toString());
+    return d;
+  });
+  Module.load = (function(b) {
+    Ma(read(b));
+  });
+  Module.arguments || (Module.arguments = process.argv.slice(2));
+} else {
+  Fa ? (Module.print = print, "undefined" != typeof printErr && (Module.printErr = printErr), Module.read = "undefined" != typeof read ? read : (function(b) {
+    snarf(b);
+  }), Module.arguments || ("undefined" != typeof scriptArgs ? Module.arguments = scriptArgs : "undefined" != typeof arguments && (Module.arguments = arguments))) : na ? (Module.print || (Module.print = (function(b) {
+    console.log(b);
+  })), Module.printErr || (Module.printErr = (function(b) {
+    console.log(b);
+  })), Module.read = (function(b) {
+    var d = new XMLHttpRequest;
+    d.open("GET", b, m);
+    d.send(l);
+    return d.responseText;
+  }), Module.arguments || "undefined" != typeof arguments && (Module.arguments = arguments)) : Ea ? Module.load = importScripts : a("Unknown runtime environment. Where are we?");
+}
+
+function Ma(b) {
+  eval.call(l, b);
+}
+
+"undefined" == !Module.load && Module.read && (Module.load = (function(b) {
+  Ma(Module.read(b));
+}));
+
+Module.print || (Module.print = (function() {}));
+
+Module.printErr || (Module.printErr = Module.print);
+
+Module.arguments || (Module.arguments = []);
+
+Module.print = Module.print;
+
+Module.N = Module.printErr;
+
+Module.preRun || (Module.preRun = []);
+
+Module.postRun || (Module.postRun = []);
+
+var Na = {
+  i1: 0,
+  i8: 0,
+  i16: 0,
+  i32: 0,
+  i64: 0
+}, Xa = {
+  "float": 0,
+  "double": 0
+};
+
+function Ya(b) {
+  if (1 == db) {
+    return 1;
+  }
+  var d = {
+    "%i1": 1,
+    "%i8": 1,
+    "%i16": 2,
+    "%i32": 4,
+    "%i64": 8,
+    "%float": 4,
+    "%double": 8
+  }["%" + b];
+  d || ("*" == b[b.length - 1] ? d = db : "i" == b[0] && (b = parseInt(b.substr(1)), eb(0 == b % 8), d = b / 8));
+  return d;
+}
+
+function fb(b) {
+  var d = {};
+  b.filter((function(b) {
+    return d[b] ? m : d[b] = g;
+  }));
+}
+
+function Gb() {
+  var b, d, c;
+  d = b = 0;
+  var e = [], f = -1;
+  c = [ "i32", "i32" ].map((function(c) {
+    var h, j;
+    c in Na || c in Xa || "*" == c[c.length - 1] ? j = h = Ya(c) : (isPointerType(c) ? 0 : /^\[\d+\ x\ (.*)\]/.test(c) || /<?{ ?[^}]* ?}>?/.test(c) || "%" == c[0]) ? (h = Types.types[c].T, j = Types.types[c].R) : a("Unclear type in struct: " + c + ", in undefined :: " + dump(Types.types[ca]));
+    j = Math.min(j, db);
+    d = Math.max(d, j);
+    c = Pb(b, j);
+    b = c + h;
+    0 <= f && e.push(c - f);
+    return f = c;
+  }));
+  b = Pb(b, d);
+  0 == e.length || fb(e);
+  return c;
+}
+
+function Qb() {
+  var b = [], d = 0;
+  this.w = (function(c) {
+    c &= 255;
+    d && (b.push(c), d--);
+    if (0 == b.length) {
+      if (128 > c) {
+        return String.fromCharCode(c);
+      }
+      b.push(c);
+      d = 191 < c && 224 > c ? 1 : 2;
+      return "";
+    }
+    if (0 < d) {
+      return "";
+    }
+    var c = b[0], e = b[1], f = b[2], c = 191 < c && 224 > c ? String.fromCharCode((c & 31) << 6 | e & 63) : String.fromCharCode((c & 15) << 12 | (e & 63) << 6 | f & 63);
+    b.length = 0;
+    return c;
+  });
+  this.O = (function(b) {
+    for (var b = unescape(encodeURIComponent(b)), d = [], f = 0; f < b.length; f++) {
+      d.push(b.charCodeAt(f));
+    }
+    return d;
+  });
+}
+
+function Rb(b) {
+  var d = n;
+  n += b;
+  n = n + 3 >> 2 << 2;
+  return d;
+}
+
+function Sb(b) {
+  var d = Tb;
+  Tb += b;
+  Tb = Tb + 3 >> 2 << 2;
+  if (Tb >= Ub) {
+    for (; Ub <= Tb; ) {
+      Ub = 2 * Ub + 4095 >> 12 << 12;
+    }
+    var b = r, c = new ArrayBuffer(Ub);
+    r = new Int8Array(c);
+    ac = new Int16Array(c);
+    B = new Int32Array(c);
+    bc = new Uint8Array(c);
+    fc = new Uint16Array(c);
+    C = new Uint32Array(c);
+    gc = new Float32Array(c);
+    hc = new Float64Array(c);
+    r.set(b);
+  }
+  return d;
+}
+
+function Pb(b, d) {
+  return Math.ceil(b / (d ? d : 4)) * (d ? d : 4);
+}
+
+var db = 4, ic = {}, jc = 0, kc;
+
+function lc(b) {
+  Module.print(b + ":\n" + Error().stack);
+  a("Assertion: " + b);
+}
+
+function eb(b, d) {
+  b || lc("Assertion failed: " + d);
+}
+
+var mc = this;
+
+function sc(b, d, c, e) {
+  function f(b, c) {
+    if ("string" == c) {
+      if (b === l || b === ca || 0 === b) {
+        return 0;
+      }
+      i || (i = n);
+      var d = Rb(b.length + 1);
+      tc(b, d);
+      return d;
+    }
+    return "array" == c ? (i || (i = n), d = Rb(b.length), uc(b, d), d) : b;
+  }
+  var i = 0;
+  try {
+    var h = eval("_" + b);
+  } catch (j) {
+    try {
+      h = mc.Module["_" + b];
+    } catch (k) {}
+  }
+  eb(h, "Cannot call unknown function " + b + " (perhaps LLVM optimizations or closure removed it?)");
+  var o = 0, b = e ? e.map((function(b) {
+    return f(b, c[o++]);
+  })) : [], d = (function(b, c) {
+    if ("string" == c) {
+      return vc(b);
+    }
+    eb("array" != c);
+    return b;
+  })(h.apply(l, b), d);
+  i && (n = i);
+  return d;
+}
+
+Module.ccall = sc;
+
+Module.cwrap = (function(b, d, c) {
+  return (function() {
+    return sc(b, d, c, Array.prototype.slice.call(arguments));
+  });
+});
+
+function wc(b, d, c) {
+  c = c || "i8";
+  "*" === c[c.length - 1] && (c = "i32");
+  switch (c) {
+   case "i1":
+    r[b] = d;
+    break;
+   case "i8":
+    r[b] = d;
+    break;
+   case "i16":
+    ac[b >> 1] = d;
+    break;
+   case "i32":
+    B[b >> 2] = d;
+    break;
+   case "i64":
+    B[b >> 2] = d;
+    break;
+   case "float":
+    gc[b >> 2] = d;
+    break;
+   case "double":
+    D[0] = d;
+    B[b >> 2] = E[0];
+    B[b + 4 >> 2] = E[1];
+    break;
+   default:
+    lc("invalid type for setValue: " + c);
+  }
+}
+
+Module.setValue = wc;
+
+Module.getValue = (function(b, d) {
+  d = d || "i8";
+  "*" === d[d.length - 1] && (d = "i32");
+  switch (d) {
+   case "i1":
+    return r[b];
+   case "i8":
+    return r[b];
+   case "i16":
+    return ac[b >> 1];
+   case "i32":
+    return B[b >> 2];
+   case "i64":
+    return B[b >> 2];
+   case "float":
+    return gc[b >> 2];
+   case "double":
+    return E[0] = B[b >> 2], E[1] = B[b + 4 >> 2], D[0];
+   default:
+    lc("invalid type for setValue: " + d);
+  }
+  return l;
+});
+
+var xc = 1, F = 2;
+
+Module.ALLOC_NORMAL = 0;
+
+Module.ALLOC_STACK = xc;
+
+Module.ALLOC_STATIC = F;
+
+function G(b, d, c) {
+  var e, f;
+  "number" === typeof b ? (e = g, f = b) : (e = m, f = b.length);
+  var i = "string" === typeof d ? d : l, c = [ J, Rb, Sb ][c === ca ? F : c](Math.max(f, i ? 1 : d.length));
+  if (e) {
+    return yc(c, f), c;
+  }
+  e = 0;
+  for (var h; e < f; ) {
+    var j = b[e];
+    "function" === typeof j && (j = ic.U(j));
+    h = i || d[e];
+    0 === h ? e++ : ("i64" == h && (h = "i32"), wc(c + e, j, h), e += Ya(h));
+  }
+  return c;
+}
+
+Module.allocate = G;
+
+function vc(b, d) {
+  for (var c = new Qb, e = "undefined" == typeof d, f = "", i = 0, h; ; ) {
+    h = bc[b + i];
+    if (e && 0 == h) {
+      break;
+    }
+    f += c.w(h);
+    i += 1;
+    if (!e && i == d) {
+      break;
+    }
+  }
+  return f;
+}
+
+Module.Pointer_stringify = vc;
+
+Module.Array_stringify = (function(b) {
+  for (var d = "", c = 0; c < b.length; c++) {
+    d += String.fromCharCode(b[c]);
+  }
+  return d;
+});
+
+var zc, Bc = 4096, r, bc, ac, fc, B, C, gc, hc, n, Cc, Tb, Dc = Module.TOTAL_STACK || 5242880, Ub = Module.TOTAL_MEMORY || 10485760;
+
+eb(!!Int32Array && !!Float64Array && !!(new Int32Array(1)).subarray && !!(new Int32Array(1)).set, "Cannot fallback to non-typed array case: Code is too specialized");
+
+var Ec = new ArrayBuffer(Ub);
+
+r = new Int8Array(Ec);
+
+ac = new Int16Array(Ec);
+
+B = new Int32Array(Ec);
+
+bc = new Uint8Array(Ec);
+
+fc = new Uint16Array(Ec);
+
+C = new Uint32Array(Ec);
+
+gc = new Float32Array(Ec);
+
+hc = new Float64Array(Ec);
+
+B[0] = 255;
+
+eb(255 === bc[0] && 0 === bc[3], "Typed arrays 2 must be run on a little-endian system");
+
+var Gc = Fc("(null)");
+
+Tb = Gc.length;
+
+for (var Hc = 0; Hc < Gc.length; Hc++) {
+  r[Hc] = Gc[Hc];
+}
+
+Module.HEAP = ca;
+
+Module.HEAP8 = r;
+
+Module.HEAP16 = ac;
+
+Module.HEAP32 = B;
+
+Module.HEAPU8 = bc;
+
+Module.HEAPU16 = fc;
+
+Module.HEAPU32 = C;
+
+Module.HEAPF32 = gc;
+
+Module.HEAPF64 = hc;
+
+Cc = (n = Pb(Tb)) + Dc;
+
+var Ic = Pb(Cc, 8);
+
+r.subarray(Ic);
+
+var E = B.subarray(Ic >> 2);
+
+gc.subarray(Ic >> 2);
+
+var D = hc.subarray(Ic >> 3);
+
+Cc = Ic + 8;
+
+Tb = Cc + 4095 >> 12 << 12;
+
+function Jc(b) {
+  for (; 0 < b.length; ) {
+    var d = b.shift(), c = d.n;
+    "number" === typeof c && (c = zc[c]);
+    c(d.J === ca ? l : d.J);
+  }
+}
+
+var Kc = [], Lc = [], Nc = [];
+
+function Pc(b) {
+  for (var d = 0; r[b + d]; ) {
+    d++;
+  }
+  return d;
+}
+
+Module.String_len = Pc;
+
+function Fc(b, d, c) {
+  b = (new Qb).O(b);
+  c && (b.length = c);
+  d || b.push(0);
+  return b;
+}
+
+Module.intArrayFromString = Fc;
+
+Module.intArrayToString = (function(b) {
+  for (var d = [], c = 0; c < b.length; c++) {
+    var e = b[c];
+    255 < e && (e &= 255);
+    d.push(String.fromCharCode(e));
+  }
+  return d.join("");
+});
+
+function tc(b, d, c) {
+  b = Fc(b, c);
+  for (c = 0; c < b.length; ) {
+    r[d + c] = b[c], c += 1;
+  }
+}
+
+Module.writeStringToMemory = tc;
+
+function uc(b, d) {
+  for (var c = 0; c < b.length; c++) {
+    r[d + c] = b[c];
+  }
+}
+
+Module.writeArrayToMemory = uc;
+
+var Qc = [];
+
+function Rc(b, d) {
+  return 0 <= b ? b : 32 >= d ? 2 * Math.abs(1 << d - 1) + b : Math.pow(2, d) + b;
+}
+
+function Sc(b, d) {
+  if (0 >= b) {
+    return b;
+  }
+  var c = 32 >= d ? Math.abs(1 << d - 1) : Math.pow(2, d - 1);
+  if (b >= c && (32 >= d || b > c)) {
+    b = -2 * c + b;
+  }
+  return b;
+}
+
+var Tc = 0;
+
+function Uc() {
+  Tc++;
+  Module.monitorRunDependencies && Module.monitorRunDependencies(Tc);
+}
+
+Module.addRunDependency = Uc;
+
+Module.removeRunDependency = (function() {
+  Tc--;
+  Module.monitorRunDependencies && Module.monitorRunDependencies(Tc);
+  0 == Tc && Vc();
+});
+
+function Wc(b, d, c, e) {
+  var f = b + 4 | 0;
+  D[0] = d;
+  B[f >> 2] = E[0];
+  B[f + 4 >> 2] = E[1];
+  d = b + 20 | 0;
+  D[0] = c;
+  B[d >> 2] = E[0];
+  B[d + 4 >> 2] = E[1];
+  b = b + 12 | 0;
+  D[0] = e;
+  B[b >> 2] = E[0];
+  B[b + 4 >> 2] = E[1];
+}
+
+function Xc(b, d, c, e) {
+  var f = b + 4 | 0;
+  D[0] = d;
+  B[f >> 2] = E[0];
+  B[f + 4 >> 2] = E[1];
+  d = b + 20 | 0;
+  D[0] = c;
+  B[d >> 2] = E[0];
+  B[d + 4 >> 2] = E[1];
+  b = b + 12 | 0;
+  D[0] = e;
+  B[b >> 2] = E[0];
+  B[b + 4 >> 2] = E[1];
+}
+
+function Yc(b, d) {
+  var c, e, f;
+  B[Zc >> 2] = 1;
+  B[Zc + 4 >> 2] = 10;
+  B[Zc + 8 >> 2] = 0;
+  var i = J(80);
+  B[Zc + 12 >> 2] = i;
+  i = 0 < (b | 0);
+  a : do {
+    if (i) {
+      for (c = 0; ; ) {
+        e = B[d + (c << 2) >> 2];
+        f = e = $c(e, Pc(e));
+        var h = B[Zc + 4 >> 2], j = B[Zc + 8 >> 2], k = B[Zc + 12 >> 2];
+        (j | 0) < (h | 0) || (h <<= 1, k = ad(k, h << 2 | 0), B[Zc + 12 >> 2] = k, B[Zc + 4 >> 2] = h);
+        B[((j << 2) + k | 0) >> 2] = f;
+        B[Zc + 8 >> 2] = j + 1 | 0;
+        bd(f);
+        cd(e);
+        c = c + 1 | 0;
+        if ((c | 0) == (b | 0)) {
+          break a;
+        }
+      }
+    }
+  } while (0);
+  j = dd();
+  Wc(j, 0, 0, 0);
+  k = dd();
+  Wc(k, 1, 0, 0);
+  i = dd();
+  Wc(i, 0, 1, 0);
+  B[ed >> 2] = i;
+  gd(i);
+  h = dd();
+  Wc(h, 0, 0, 1);
+  f = (i + 4 | 0) >> 2;
+  var o = (E[0] = B[f], E[1] = B[f + 1], D[0]);
+  e = (i + 12 | 0) >> 2;
+  var s = (E[0] = B[e], E[1] = B[e + 1], D[0]);
+  c = (i + 20 | 0) >> 2;
+  var p = (E[0] = B[c], E[1] = B[c + 1], D[0]), o = hd(k, o, s, p), s = id(o, k);
+  L(o);
+  o = s ^ 1;
+  L(h);
+  L(j);
+  L(k);
+  o && (j = jd(), k = B[j + 8 >> 2], h = B[j + 4 >> 2], kd(Qc.i | 0, (kc = n, n += 8, B[kc >> 2] = h, B[kc + 4 >> 2] = k, kc)), cd(j));
+  j = dd();
+  Wc(j, -1, -1, 0);
+  f = (E[0] = B[f], E[1] = B[f + 1], D[0]);
+  e = (E[0] = B[e], E[1] = B[e + 1], D[0]);
+  c = (E[0] = B[c], E[1] = B[c + 1], D[0]);
+  c = hd(j, f, e, c);
+  L(j);
+  e = dd();
+  Wc(e, -1, 1, 0);
+  f = id(c, e);
+  L(c);
+  L(e);
+  c = f ^ 1;
+  L(i);
+  c && (i = jd(), c = B[i + 8 >> 2], e = B[i + 4 >> 2], kd(Qc.i | 0, (kc = n, n += 8, B[kc >> 2] = e, B[kc + 4 >> 2] = c, kc)), cd(i));
+  i = ld();
+  Xc(i, 0, 0, 0);
+  B[md >> 2] = i;
+  nd(i);
+  c = dd();
+  Wc(c, 3, 4, 12);
+  e = dd();
+  Wc(e, 1, 1, 1);
+  f = J(16);
+  j = J(80);
+  B[f >> 2] = 1;
+  B[(f + 4 | 0) >> 2] = 10;
+  B[(f + 8 | 0) >> 2] = 0;
+  B[(f + 12 | 0) >> 2] = j;
+  a : do {
+    for (j = 0; ; ) {
+      j = 1 + j | 0;
+      k = od();
+      pd();
+      var k = od() - k, s = f + 4 | 0, h = f + 8 | 0, p = f + 12 | 0, w = B[s >> 2], o = B[h >> 2], u = B[p >> 2];
+      (o | 0) < (w | 0) || (w <<= 1, u = ad(u, w << 3 | 0), B[p >> 2] = u, B[s >> 2] = w);
+      s = u;
+      s = (o << 3) + s | 0;
+      D[0] = k;
+      B[s >> 2] = E[0];
+      B[s + 4 >> 2] = E[1];
+      B[h >> 2] = o + 1 | 0;
+      if (1 <= (j | 0)) {
+        break a;
+      }
+    }
+  } while (0);
+  j = f | 0;
+  k = B[j >> 2] - 1 | 0;
+  B[j >> 2] = k;
+  1 > (k | 0) && (0 > (k | 0) && (O(), a("Reached an unreachable!")), P(B[f + 12 >> 2]), P(f));
+  L(c);
+  Q(i);
+  L(e);
+  Q(B[md >> 2]);
+  L(B[ed >> 2]);
+  i = B[Zc + 8 >> 2];
+  c = 0 < (i | 0);
+  a : do {
+    if (c) {
+      for (e = 0; ; ) {
+        if (cd(B[B[Zc + 12 >> 2] + (e << 2) >> 2]), e = e + 1 | 0, (e | 0) == (i | 0)) {
+          break a;
+        }
+      }
+    }
+  } while (0);
+  P(B[Zc + 12 >> 2]);
+  return 0;
+}
+
+Module._main = Yc;
+
+Yc.X = 1;
+
+function qd(b, d, c, e, f, i) {
+  b += e;
+  c += i;
+  d += f;
+  f = dd();
+  Wc(f, b, c, d);
+  return f;
+}
+
+function rd(b, d, c, e) {
+  b *= e;
+  c *= e;
+  d *= e;
+  e = dd();
+  Wc(e, b, c, d);
+  return e;
+}
+
+function sd(b, d, c, e, f, i) {
+  var h = c * f - d * i, d = d * e - b * f, b = b * i - c * e, c = dd();
+  Wc(c, h, d, b);
+  return c;
+}
+
+function td(b, d, c) {
+  var e = ud(b * b + c * c + d * d);
+  return rd(b, d, c, 1 / e);
+}
+
+function id(b, d) {
+  var c = b + 4 | 0, c = (E[0] = B[c >> 2], E[1] = B[c + 4 >> 2], D[0]), e = d + 4 | 0, e = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]);
+  c == e ? (c = b + 20 | 0, c = (E[0] = B[c >> 2], E[1] = B[c + 4 >> 2], D[0]), e = d + 20 | 0, e = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]), c = c == e) : c = 0;
+  return c;
+}
+
+function hd(b, d, c, e) {
+  var f, i;
+  i = (b + 4 | 0) >> 2;
+  var h = (E[0] = B[i], E[1] = B[i + 1], D[0]);
+  f = (b + 12 | 0) >> 2;
+  var j = (E[0] = B[f], E[1] = B[f + 1], D[0]), b = (b + 20 | 0) >> 2, k = (E[0] = B[b], E[1] = B[b + 1], D[0]), d = rd(d, c, e, h * d + k * e + j * c), c = d + 4 | 0, c = (E[0] = B[c >> 2], E[1] = B[c + 4 >> 2], D[0]), e = d + 12 | 0, e = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]), h = d + 20 | 0, h = (E[0] = B[h >> 2], E[1] = B[h + 4 >> 2], D[0]), c = rd(c, e, h, 2);
+  i = (E[0] = B[i], E[1] = B[i + 1], D[0]);
+  f = (E[0] = B[f], E[1] = B[f + 1], D[0]);
+  b = (E[0] = B[b], E[1] = B[b + 1], D[0]);
+  e = c + 4 | 0;
+  h = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]);
+  e = c + 12 | 0;
+  e = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]);
+  j = c + 20 | 0;
+  j = (E[0] = B[j >> 2], E[1] = B[j + 4 >> 2], D[0]);
+  i -= h;
+  b -= j;
+  f -= e;
+  e = dd();
+  Wc(e, i, b, f);
+  L(c);
+  L(d);
+  return e;
+}
+
+function vd(b, d, c, e, f, i) {
+  b -= e;
+  c -= i;
+  d -= f;
+  f = dd();
+  Wc(f, b, c, d);
+  return f;
+}
+
+function wd(b, d, c) {
+  nd(d);
+  B[b + 12 >> 2] = d;
+  b = b + 4 | 0;
+  D[0] = c;
+  B[b >> 2] = E[0];
+  B[b + 4 >> 2] = E[1];
+}
+
+function xd(b, d) {
+  var c = B[b + 12 >> 2];
+  nd(c);
+  var e = B[d + 8 >> 2];
+  nd(e);
+  var f = c + 4 | 0, f = (E[0] = B[f >> 2], E[1] = B[f + 4 >> 2], D[0]), i = c + 12 | 0, i = (E[0] = B[i >> 2], E[1] = B[i + 4 >> 2], D[0]), h = c + 20 | 0, h = (E[0] = B[h >> 2], E[1] = B[h + 4 >> 2], D[0]), j = e + 4 | 0, j = (E[0] = B[j >> 2], E[1] = B[j + 4 >> 2], D[0]), k = e + 12 | 0, k = (E[0] = B[k >> 2], E[1] = B[k + 4 >> 2], D[0]), o = e + 20 | 0, o = (E[0] = B[o >> 2], E[1] = B[o + 4 >> 2], D[0]), f = vd(f, i, h, j, k, o);
+  Q(c);
+  Q(e);
+  e = B[d + 4 >> 2];
+  gd(e);
+  c = f + 4 | 0;
+  c = (E[0] = B[c >> 2], E[1] = B[c + 4 >> 2], D[0]);
+  i = f + 12 | 0;
+  i = (E[0] = B[i >> 2], E[1] = B[i + 4 >> 2], D[0]);
+  h = f + 20 | 0;
+  h = (E[0] = B[h >> 2], E[1] = B[h + 4 >> 2], D[0]);
+  j = e + 4 | 0;
+  j = (E[0] = B[j >> 2], E[1] = B[j + 4 >> 2], D[0]);
+  k = e + 12 | 0;
+  k = (E[0] = B[k >> 2], E[1] = B[k + 4 >> 2], D[0]);
+  o = e + 20 | 0;
+  o = (E[0] = B[o >> 2], E[1] = B[o + 4 >> 2], D[0]);
+  j = c * j + h * o + i * k;
+  L(e);
+  e = b + 4 | 0;
+  e = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]);
+  c = e * e - (c * c + h * h + i * i - j * j);
+  e = 0 > c;
+  L(f);
+  if (e) {
+    return 1e9 + 1;
+  }
+  f = ud(c);
+  return j - f;
+}
+
+xd.X = 1;
+
+function yd(b, d, c) {
+  nd(d);
+  B[b + 8 >> 2] = d;
+  var d = c + 4 | 0, d = (E[0] = B[d >> 2], E[1] = B[d + 4 >> 2], D[0]), e = c + 12 | 0, e = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]), c = c + 20 | 0, c = (E[0] = B[c >> 2], E[1] = B[c + 4 >> 2], D[0]), c = td(d, e, c);
+  gd(c);
+  B[b + 4 >> 2] = c;
+  L(c);
+}
+
+function zd(b) {
+  var d = Ad(b, 0), c = B[d + 4 >> 2];
+  Bd(c, 1);
+  var e = 1e9 + 1, d = Ad(b, 0), f = B[d + 16 >> 2];
+  Cd(f, 1);
+  d = J(12);
+  B[d >> 2] = 1;
+  B[(d + 4 | 0) >> 2] = 0;
+  B[(d + 8 | 0) >> 2] = b;
+  Dd(b, 1);
+  b = Gd(c, e, f);
+  Hd(c);
+  Jd(f);
+  c = d + 4 | 0;
+  e = d + 8 | 0;
+  a : for (;;) {
+    for (f = b + 8 | 0; ; ) {
+      if ((B[B[e >> 2] + 8 >> 2] | 0) <= (B[c >> 2] | 0)) {
+        break a;
+      }
+      var i;
+      i = d + 4 | 0;
+      var h = B[i >> 2], j = Ad(B[d + 8 >> 2], h);
+      B[i >> 2] = h + 1 | 0;
+      i = j;
+      h = i + 8 | 0;
+      h = (E[0] = B[h >> 2], E[1] = B[h + 4 >> 2], D[0]);
+      if (1e9 > h && -1e-5 < h) {
+        j = (E[0] = B[f >> 2], E[1] = B[f + 4 >> 2], D[0]);
+        if (1e9 < j || h < j) {
+          break;
+        }
+        Vd(b, 1);
+      }
+    }
+    Vd(i, 1);
+    b = i;
+  }
+  i = d | 0;
+  c = B[i >> 2] - 1 | 0;
+  B[i >> 2] = c;
+  1 > (c | 0) && (0 > (c | 0) && (O(), a("Reached an unreachable!")), Wd(B[d + 8 >> 2]), P(d));
+  return b;
+}
+
+zd.X = 1;
+
+function Xd(b, d, c, e) {
+  Yd(b, 1);
+  var f = J(16);
+  B[f >> 2] = 1;
+  var i = f + 4 | 0;
+  Bd(d, 1);
+  B[i >> 2] = d;
+  d = f + 8 | 0;
+  Zd(c, 1);
+  B[d >> 2] = c;
+  c = f + 12 | 0;
+  Cd(e, 1);
+  B[c >> 2] = e;
+  var d = b + 4 | 0, e = b + 8 | 0, i = b + 12 | 0, h = B[d >> 2], c = B[e >> 2], j = B[i >> 2];
+  (c | 0) < (h | 0) || (h <<= 1, j = ad(j, h << 2 | 0), B[i >> 2] = j, B[d >> 2] = h);
+  d = j;
+  B[((c << 2) + d | 0) >> 2] = f;
+  B[e >> 2] = c + 1 | 0;
+  $d(f, 1);
+  ae(f);
+  be(b);
+}
+
+function ce(b, d) {
+  var c, e, f, i, h = de(3.14159265359 * ((B[b + 4 >> 2] | 0) / 2) / 180), j = .75 * h, k = 2 * j, o = d + 4 | 0, s = 2 * h / (B[o >> 2] - 1 | 0);
+  i = (d + 16 | 0) >> 2;
+  var p = k / (B[i] - 1 | 0), w = b + 24 | 0, u = B[w >> 2];
+  nd(u);
+  var x = B[b + 8 >> 2];
+  nd(x);
+  var v = B[w >> 2];
+  nd(v);
+  var t = x + 4 | 0, y = (E[0] = B[t >> 2], E[1] = B[t + 4 >> 2], D[0]), q = x + 12 | 0, z = (E[0] = B[q >> 2], E[1] = B[q + 4 >> 2], D[0]), I = x + 20 | 0, T = (E[0] = B[I >> 2], E[1] = B[I + 4 >> 2], D[0]), X = v + 4 | 0, K = (E[0] = B[X >> 2], E[1] = B[X + 4 >> 2], D[0]), N = v + 12 | 0, H = (E[0] = B[N >> 2], E[1] = B[N + 4 >> 2], D[0]), U = v + 20 | 0, Za = (E[0] = B[U >> 2], E[1] = B[U + 4 >> 2], D[0]), ua = vd(y, z, T, K, H, Za);
+  Q(x);
+  Q(v);
+  var Oa = ee();
+  yd(Oa, u, ua);
+  Q(u);
+  L(ua);
+  var da = B[Oa + 4 >> 2];
+  gd(da);
+  var va = B[ed >> 2];
+  gd(va);
+  f = (da + 4 | 0) >> 2;
+  var Pa = (E[0] = B[f], E[1] = B[f + 1], D[0]);
+  e = (da + 12 | 0) >> 2;
+  var Y = (E[0] = B[e], E[1] = B[e + 1], D[0]);
+  c = (da + 20 | 0) >> 2;
+  var ob = (E[0] = B[c], E[1] = B[c + 1], D[0]), oa = va + 4 | 0, pb = (E[0] = B[oa >> 2], E[1] = B[oa + 4 >> 2], D[0]), gb = va + 12 | 0, hb = (E[0] = B[gb >> 2], E[1] = B[gb + 4 >> 2], D[0]), Z = va + 20 | 0, Ha = (E[0] = B[Z >> 2], E[1] = B[Z + 4 >> 2], D[0]), ha = sd(Pa, Y, ob, pb, hb, Ha);
+  L(va);
+  L(da);
+  var $a = ha + 4 | 0, ib = (E[0] = B[$a >> 2], E[1] = B[$a + 4 >> 2], D[0]), pa = ha + 12 | 0, wa = (E[0] = B[pa >> 2], E[1] = B[pa + 4 >> 2], D[0]), Qa = ha + 20 | 0, Hb = (E[0] = B[Qa >> 2], E[1] = B[Qa + 4 >> 2], D[0]), xa = td(ib, wa, Hb);
+  L(ha);
+  gd(da);
+  var Lb = xa + 4 | 0, R = (E[0] = B[Lb >> 2], E[1] = B[Lb + 4 >> 2], D[0]), S = xa + 12 | 0, ya = (E[0] = B[S >> 2], E[1] = B[S + 4 >> 2], D[0]), Ra = xa + 20 | 0, qb = (E[0] = B[Ra >> 2], E[1] = B[Ra + 4 >> 2], D[0]), ba = (E[0] = B[f], E[1] = B[f + 1], D[0]), rb = (E[0] = B[e], E[1] = B[e + 1], D[0]), sb = (E[0] = B[c], E[1] = B[c + 1], D[0]), qa = sd(R, ya, qb, ba, rb, sb);
+  L(da);
+  var Sa = qa + 4 | 0, tb = (E[0] = B[Sa >> 2], E[1] = B[Sa + 4 >> 2], D[0]), Ta = qa + 12 | 0, ea = (E[0] = B[Ta >> 2], E[1] = B[Ta + 4 >> 2], D[0]), Ia = qa + 20 | 0, ub = (E[0] = B[Ia >> 2], E[1] = B[Ia + 4 >> 2], D[0]), za = td(tb, ea, ub);
+  L(qa);
+  var ka = B[i], Aa = 0 < (ka | 0);
+  a : do {
+    if (Aa) {
+      for (var Vb = Oa + 8 | 0, vb = za + 4 | 0, wb = za + 12 | 0, xb = za + 20 | 0, Ba = 0, M = 0, ra = ka; ; ) {
+        var $ = 1 + Ba | 0, Ua = (Ba | 0) / (ra | 0);
+        if (.05 < Ua - M) {
+          var Ib = 100 * Ua & -1;
+          kd(Qc.G | 0, (kc = n, n += 4, B[kc >> 2] = Ib, kc));
+          var ab = Ua;
+        } else {
+          ab = M;
+        }
+        var yb = B[o >> 2], Va = 0 < (yb | 0);
+        b : do {
+          if (Va) {
+            for (var Mb = p * (Ba | 0) - j, la = B[Vb >> 2], Nb = (E[0] = B[vb >> 2], E[1] = B[vb + 4 >> 2], D[0]), jb = (E[0] = B[wb >> 2], E[1] = B[wb + 4 >> 2], D[0]), zb = (E[0] = B[xb >> 2], E[1] = B[xb + 4 >> 2], D[0]), sa = 0; ; ) {
+              var fa = 1 + sa | 0, Ca = rd(R, ya, qb, s * (sa | 0) - h), aa = rd(Nb, jb, zb, Mb);
+              nd(la);
+              gd(da);
+              var kb = (E[0] = B[f], E[1] = B[f + 1], D[0]), Da = (E[0] = B[e], E[1] = B[e + 1], D[0]), Wa = (E[0] = B[c], E[1] = B[c + 1], D[0]), Ab = Ca + 4 | 0, lb = (E[0] = B[Ab >> 2], E[1] = B[Ab + 4 >> 2], D[0]), Bb = Ca + 12 | 0, Ja = (E[0] = B[Bb >> 2], E[1] = B[Bb + 4 >> 2], D[0]), mb = Ca + 20 | 0, ta = (E[0] = B[mb >> 2], E[1] = B[mb + 4 >> 2], D[0]), bb = qd(kb, Da, Wa, lb, Ja, ta);
+              L(da);
+              var ia = bb + 4 | 0, Cb = (E[0] = B[ia >> 2], E[1] = B[ia + 4 >> 2], D[0]), ma = bb + 12 | 0, Jb = (E[0] = B[ma >> 2], E[1] = B[ma + 4 >> 2], D[0]), Db = bb + 20 | 0, cb = (E[0] = B[Db >> 2], E[1] = B[Db + 4 >> 2], D[0]), cc = aa + 4 | 0, nc = (E[0] = B[cc >> 2], E[1] = B[cc + 4 >> 2], D[0]), oc = aa + 12 | 0, Wb = (E[0] = B[oc >> 2], E[1] = B[oc + 4 >> 2], D[0]), Eb = aa + 20 | 0, pc = (E[0] = B[Eb >> 2], E[1] = B[Eb + 4 >> 2], D[0]), Xb = qd(Cb, Jb, cb, nc, Wb, pc);
+              L(bb);
+              var Ob = ee();
+              yd(Ob, la, Xb);
+              Q(la);
+              L(Xb);
+              var nb = fe(b, Ob), Yb = nb + 4 | 0, Kb = (E[0] = B[Yb >> 2], E[1] = B[Yb + 4 >> 2], D[0]), dc = nb + 12 | 0, Zb = (E[0] = B[dc >> 2], E[1] = B[dc + 4 >> 2], D[0]), $b = nb + 20 | 0, qc = (E[0] = B[$b >> 2], E[1] = B[$b + 4 >> 2], D[0]), Re = sa, Se = Ba, cg = (0 > ((255 < (255 * Zb & -1 | 0) ? 255 : 255 * Zb & -1) | 0) ? 0 : 255 < (255 * Zb & -1 | 0) ? 255 : 255 * Zb & -1) & 255, dg = (0 > ((255 < (255 * qc & -1 | 0) ? 255 : 255 * qc & -1) | 0) ? 0 : 255 < (255 * qc & -1 | 0) ? 255 : 255 * qc & -1) & 255, Mc = B[ge >> 2];
+              r[he + Mc | 0] = (0 > ((255 < (255 * Kb & -1 | 0) ? 255 : 255 * Kb & -1) | 0) ? 0 : 255 < (255 * Kb & -1 | 0) ? 255 : 255 * Kb & -1) & 255;
+              r[Mc + (he + 1) | 0] = cg;
+              r[Mc + (he + 2) | 0] = dg;
+              r[Mc + (he + 3) | 0] = -1;
+              var Te = Mc + 4 | 0;
+              B[ge >> 2] = Te;
+              if (2559 < (Te | 0)) {
+                var eg = (Re + 640 * (480 - Se) + 1073741184 << 2) - 2556 | 0;
+                alert(Re, Se);
+                var Ed = B[je >> 2], Fd = Ed, Fb = ke[Fd];
+                Fb.g++;
+                if (1 >= Fb.g) {
+                  if (!Fb.b && (Fb.b = Fb.l.getImageData(0, 0, Fb.width, Fb.height), Fd == le)) {
+                    for (var Ue = Fb.b.data, gg = Ue.length, Id = 0; Id < gg / 4; Id++) {
+                      Ue[4 * Id + 3] = 255;
+                    }
+                  }
+                  me && (Fb.q(2097152) && a("CopyOnLock is not supported for SDL_LockSurface with SDL_HWPALETTE flag set" + Error().stack), bc.set(Fb.b.data, Fb.buffer));
+                  B[Fd + 5 * db >> 2] = Fb.buffer;
+                }
+                ne(B[Ed + 20 >> 2] + eg | 0, he | 0, 2560);
+                var We = Ed;
+                eb(!oe);
+                var Ka = ke[We];
+                Ka.g--;
+                if (0 >= Ka.g) {
+                  if (Ka.q(2097152)) {
+                    if (Ka.k) {
+                      for (var Xe = Module.canvas.width, ig = Xe - 0 + 0, jg = Module.canvas.height - 0 + 0, kg = Ka.buffer, Kd = Ka.b.data, lg = Ka.k, Ld = 0; Ld < jg; ++Ld) {
+                        for (var Ye = Ld * Xe, mg = 4 * Ye, fd = 0; fd < ig; ++fd) {
+                          var Md = lg[bc[kg + Ye + fd]] || [ Math.floor(255 * Math.random()), Math.floor(255 * Math.random()), Math.floor(255 * Math.random()) ], Nd = mg + 4 * fd;
+                          Kd[Nd] = Md[0];
+                          Kd[Nd + 1] = Md[1];
+                          Kd[Nd + 2] = Md[2];
+                        }
+                      }
+                    }
+                  } else {
+                    if (Ka.k) {
+                      for (var Od = Module.canvas.width, ng = Module.canvas.height, Pd = Ka.buffer, ec = Ka.b.data, og = Ka.k, Qd = 0; Qd < ng; Qd++) {
+                        for (var pg = 4 * Qd * Od, Rd = 0; Rd < Od; Rd++) {
+                          var Ac = bc[Pd++], Sd = og[Ac] || [ Math.floor(255 * Math.random()), Math.floor(255 * Math.random()), Math.floor(255 * Math.random()) ], Td = pg + 4 * Rd;
+                          ec[Td] = Sd[0];
+                          ec[Td + 1] = Sd[1];
+                          ec[Td + 2] = Sd[2];
+                        }
+                        Pd += 3 * Od;
+                      }
+                    } else {
+                      var qg = Ka.b.data.length, ec = Ka.b.data, Ud = Ka.buffer;
+                      eb(0 == Ud % 4, "Invalid buffer offset: " + Ud);
+                      for (var Ze = Ud >> 2, rc = 0, rg = We == le; rc < qg; ) {
+                        var Ac = B[Ze];
+                        ec[rc] = Ac & 255;
+                        ec[rc + 1] = Ac >> 8 & 255;
+                        ec[rc + 2] = Ac >> 16 & 255;
+                        ec[rc + 3] = rg ? 255 : Ac >> 24 & 255;
+                        Ze++;
+                        rc += 4;
+                      }
+                    }
+                  }
+                  Ka.l.putImageData(Ka.b, 0, 0);
+                }
+                B[ge >> 2] = 0;
+              }
+              L(Ca);
+              L(aa);
+              pe(Ob);
+              if ((fa | 0) >= (yb | 0)) {
+                break b;
+              }
+              sa = fa;
+            }
+          }
+        } while (0);
+        if (($ | 0) >= (ka | 0)) {
+          break a;
+        }
+        Ba = $;
+        M = ab;
+        ra = B[i];
+      }
+    }
+  } while (0);
+  L(xa);
+  pe(Oa);
+  L(za);
+  var Oc = $c(Qc.H | 0, 9), $e = Oc | 0;
+  B[$e >> 2] = B[$e >> 2] + 1 | 0;
+  cd(Oc);
+  var sg = B[Oc + 8 >> 2], tg = B[Oc + 4 >> 2];
+  kd(Qc.i | 0, (kc = n, n += 8, B[kc >> 2] = tg, B[kc + 4 >> 2] = sg, kc));
+  cd(Oc);
+}
+
+ce.X = 1;
+
+function fe(b, d) {
+  var c, e, f;
+  f = (b + 20 | 0) >> 2;
+  var i = B[f];
+  if (3 < (i | 0)) {
+    return qe(0, 0, 0);
+  }
+  B[f] = 1 + i | 0;
+  var i = J(16), h = J(40);
+  B[i >> 2] = 1;
+  B[(i + 4 | 0) >> 2] = 10;
+  B[(i + 8 | 0) >> 2] = 0;
+  B[(i + 12 | 0) >> 2] = h;
+  c = B[b + 16 >> 2];
+  Yd(c, 1);
+  h = re(c);
+  be(c);
+  c = h + 4 | 0;
+  var j = h + 8 | 0, k = (B[B[j >> 2] + 8 >> 2] | 0) > (B[c >> 2] | 0);
+  a : do {
+    if (k) {
+      for (;;) {
+        var o = se(h);
+        e = o >> 2;
+        var s = B[e + 1];
+        Bd(s, 1);
+        var p = B[e + 2];
+        Zd(p, 1);
+        e = B[e + 3];
+        Cd(e, 1);
+        ae(o);
+        var o = zc[B[p + 4 >> 2]](p, d), w = o = Gd(s, o, e), u = i + 4 | 0, x = i + 8 | 0, v = i + 12 | 0, t = B[u >> 2], y = B[x >> 2], q = B[v >> 2];
+        (y | 0) < (t | 0) || (t <<= 1, q = ad(q, t << 2 | 0), B[v >> 2] = q, B[u >> 2] = t);
+        u = q;
+        B[((y << 2) + u | 0) >> 2] = w;
+        B[x >> 2] = y + 1 | 0;
+        Vd(w, 1);
+        te(o);
+        Hd(s);
+        ue(p);
+        Jd(e);
+        if ((B[B[j >> 2] + 8 >> 2] | 0) <= (B[c >> 2] | 0)) {
+          break a;
+        }
+      }
+    }
+  } while (0);
+  ve(h);
+  h = zd(i);
+  c = (h + 8 | 0) >> 2;
+  j = 1e9 < (E[0] = B[c], E[1] = B[c + 1], D[0]);
+  Wd(i);
+  if (j) {
+    return B[f] = B[f] - 1 | 0, qe(0, 0, 0);
+  }
+  i = B[h + 4 >> 2];
+  Bd(i, 1);
+  j = (E[0] = B[c], E[1] = B[c + 1], D[0]);
+  h = B[h + 16 >> 2];
+  Cd(h, 1);
+  c = B[d + 8 >> 2];
+  nd(c);
+  k = B[d + 4 >> 2];
+  gd(k);
+  s = k + 4 | 0;
+  s = (E[0] = B[s >> 2], E[1] = B[s + 4 >> 2], D[0]);
+  p = k + 12 | 0;
+  p = (E[0] = B[p >> 2], E[1] = B[p + 4 >> 2], D[0]);
+  e = k + 20 | 0;
+  e = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]);
+  j = rd(s, p, e, j);
+  L(k);
+  k = c + 4 | 0;
+  s = (E[0] = B[k >> 2], E[1] = B[k + 4 >> 2], D[0]);
+  k = c + 12 | 0;
+  k = (E[0] = B[k >> 2], E[1] = B[k + 4 >> 2], D[0]);
+  p = c + 20 | 0;
+  p = (E[0] = B[p >> 2], E[1] = B[p + 4 >> 2], D[0]);
+  e = j + 4 | 0;
+  o = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]);
+  e = j + 12 | 0;
+  e = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]);
+  w = j + 20 | 0;
+  w = (E[0] = B[w >> 2], E[1] = B[w + 4 >> 2], D[0]);
+  s += o;
+  p += w;
+  e = k + e;
+  k = ld();
+  Xc(k, s, p, e);
+  Q(c);
+  L(j);
+  c = zc[B[i + 4 >> 2]](i, k);
+  j = zc[B[h + 4 >> 2]](h, b, d, k, c);
+  L(c);
+  B[f] = B[f] - 1 | 0;
+  Hd(i);
+  Q(k);
+  Jd(h);
+  return j;
+}
+
+fe.X = 1;
+
+function we(b, d, c) {
+  var e;
+  Yd(b, 1);
+  var f = re(b);
+  be(b);
+  for (var b = f + 4 | 0, i = f + 8 | 0, h = d + 4 | 0, j = d + 12 | 0, d = d + 20 | 0, k = c + 4 | 0, o = c + 12 | 0, s = c + 20 | 0; ; ) {
+    if ((B[B[i >> 2] + 8 >> 2] | 0) > (B[b >> 2] | 0)) {
+      var p = se(f);
+      e = p >> 2;
+      var w = B[e + 1];
+      Bd(w, 1);
+      var u = B[e + 2];
+      Zd(u, 1);
+      e = B[e + 3];
+      Cd(e, 1);
+      ae(p);
+      var p = (E[0] = B[h >> 2], E[1] = B[h + 4 >> 2], D[0]), x = (E[0] = B[j >> 2], E[1] = B[j + 4 >> 2], D[0]), v = (E[0] = B[d >> 2], E[1] = B[d + 4 >> 2], D[0]), t = (E[0] = B[k >> 2], E[1] = B[k + 4 >> 2], D[0]), y = (E[0] = B[o >> 2], E[1] = B[o + 4 >> 2], D[0]), q = (E[0] = B[s >> 2], E[1] = B[s + 4 >> 2], D[0]), x = vd(p, x, v, t, y, q), p = ee();
+      yd(p, c, x);
+      L(x);
+      x = zc[B[u + 4 >> 2]](u, p);
+      pe(p);
+      p = 1e9 > x ? 1e-5 < x : 0;
+      Hd(w);
+      ue(u);
+      Jd(e);
+      if (!p) {
+        continue;
+      }
+      ve(f);
+      var z = 0;
+      break;
+    }
+    ve(f);
+    z = 1;
+    break;
+  }
+  return z;
+}
+
+we.X = 1;
+
+function xe(b, d) {
+  var c = ye(), e = B[b + 12 >> 2];
+  ze(e, 1);
+  var f = Ae(e);
+  Be(e);
+  var e = f + 4 | 0, i = f + 8 | 0, h = (B[B[i >> 2] + 8 >> 2] | 0) > (B[e >> 2] | 0);
+  a : do {
+    if (h) {
+      for (var j = b + 16 | 0; ; ) {
+        var k = Ce(f);
+        we(B[j >> 2], k, d) && De(c, k);
+        Q(k);
+        if ((B[B[i >> 2] + 8 >> 2] | 0) <= (B[e >> 2] | 0)) {
+          break a;
+        }
+      }
+    }
+  } while (0);
+  Ee(f);
+  return c;
+}
+
+function Fe(b, d) {
+  Ge(d, 1);
+  B[b + 20 >> 2] = d;
+  var c = b + 4 | 0;
+  D[0] = .2;
+  B[c >> 2] = E[0];
+  B[c + 4 >> 2] = E[1];
+  c = b + 12 | 0;
+  D[0] = .6;
+  B[c >> 2] = E[0];
+  B[c + 4 >> 2] = E[1];
+  c = b + 24 | 0;
+  D[0] = .8 - .6;
+  B[c >> 2] = E[0];
+  B[c + 4 >> 2] = E[1];
+}
+
+function He(b, d, c, e, f) {
+  var i, h, j = B[b + 20 >> 2];
+  Ge(j, 1);
+  h = (b + 4 | 0) >> 2;
+  if (0 < (E[0] = B[h], E[1] = B[h + 1], D[0])) {
+    var k = B[c + 4 >> 2];
+    gd(k);
+    var o = f + 4 | 0, s = (E[0] = B[o >> 2], E[1] = B[o + 4 >> 2], D[0]), p = f + 12 | 0, w = (E[0] = B[p >> 2], E[1] = B[p + 4 >> 2], D[0]), u = f + 20 | 0, x = (E[0] = B[u >> 2], E[1] = B[u + 4 >> 2], D[0]), v = hd(k, s, w, x);
+    L(k);
+    var t = ee();
+    yd(t, e, v);
+    L(v);
+    var y = fe(d, t), q = qe(0, 0, 0), z = (E[0] = B[h], E[1] = B[h + 1], D[0]), I = q + 4 | 0, T = (E[0] = B[I >> 2], E[1] = B[I + 4 >> 2], D[0]), X = q + 12 | 0, K = (E[0] = B[X >> 2], E[1] = B[X + 4 >> 2], D[0]), N = q + 20 | 0, H = (E[0] = B[N >> 2], E[1] = B[N + 4 >> 2], D[0]), U = y + 4 | 0, Za = (E[0] = B[U >> 2], E[1] = B[U + 4 >> 2], D[0]), ua = y + 12 | 0, Oa = (E[0] = B[ua >> 2], E[1] = B[ua + 4 >> 2], D[0]), da = y + 20 | 0, va = (E[0] = B[da >> 2], E[1] = B[da + 4 >> 2], D[0]), Pa = qe(T + z * Za, K + z * Oa, H + z * va);
+    Ie(q);
+    pe(t);
+    Ie(y);
+    var Y = Pa;
+  } else {
+    Y = qe(0, 0, 0);
+  }
+  i = (b + 12 | 0) >> 2;
+  if (0 < (E[0] = B[i], E[1] = B[i + 1], D[0])) {
+    var ob = xe(d, e), oa = Ae(ob);
+    Be(ob);
+    var pb = oa + 4 | 0, gb = oa + 8 | 0, hb = e + 4 | 0, Z = e + 12 | 0, Ha = e + 20 | 0, ha = f + 4 | 0, $a = f + 12 | 0, ib = f + 20 | 0, pa = 0;
+    a : for (;;) {
+      for (;;) {
+        if ((B[B[gb >> 2] + 8 >> 2] | 0) <= (B[pb >> 2] | 0)) {
+          break a;
+        }
+        var wa = Ce(oa), Qa = wa + 4 | 0, Hb = (E[0] = B[Qa >> 2], E[1] = B[Qa + 4 >> 2], D[0]), xa = wa + 12 | 0, Lb = (E[0] = B[xa >> 2], E[1] = B[xa + 4 >> 2], D[0]), R = wa + 20 | 0, S = (E[0] = B[R >> 2], E[1] = B[R + 4 >> 2], D[0]), ya = (E[0] = B[hb >> 2], E[1] = B[hb + 4 >> 2], D[0]), Ra = (E[0] = B[Z >> 2], E[1] = B[Z + 4 >> 2], D[0]), qb = (E[0] = B[Ha >> 2], E[1] = B[Ha + 4 >> 2], D[0]), ba = vd(Hb, Lb, S, ya, Ra, qb), rb = ba + 4 | 0, sb = (E[0] = B[rb >> 2], E[1] = B[rb + 4 >> 2], D[0]), qa = ba + 12 | 0, Sa = (E[0] = B[qa >> 2], E[1] = B[qa + 4 >> 2], D[0]), tb = ba + 20 | 0, Ta = (E[0] = B[tb >> 2], E[1] = B[tb + 4 >> 2], D[0]), ea = td(sb, Sa, Ta);
+        L(ba);
+        var Ia = ea + 4 | 0, ub = (E[0] = B[Ia >> 2], E[1] = B[Ia + 4 >> 2], D[0]), za = ea + 12 | 0, ka = (E[0] = B[za >> 2], E[1] = B[za + 4 >> 2], D[0]), Aa = ea + 20 | 0, Vb = (E[0] = B[Aa >> 2], E[1] = B[Aa + 4 >> 2], D[0]), vb = (E[0] = B[ha >> 2], E[1] = B[ha + 4 >> 2], D[0]), wb = (E[0] = B[$a >> 2], E[1] = B[$a + 4 >> 2], D[0]), xb = (E[0] = B[ib >> 2], E[1] = B[ib + 4 >> 2], D[0]), Ba = ub * vb + Vb * xb + ka * wb;
+        L(ea);
+        var M = 0 < Ba;
+        Q(wa);
+        if (M) {
+          break;
+        }
+      }
+      pa += Ba;
+    }
+    Ee(oa);
+    var ra = 1 < pa ? 1 : pa, $ = (E[0] = B[i], E[1] = B[i + 1], D[0]) * ra, Ua = Y + 4 | 0, Ib = (E[0] = B[Ua >> 2], E[1] = B[Ua + 4 >> 2], D[0]), ab = Y + 12 | 0, yb = (E[0] = B[ab >> 2], E[1] = B[ab + 4 >> 2], D[0]), Va = Y + 20 | 0, Mb = (E[0] = B[Va >> 2], E[1] = B[Va + 4 >> 2], D[0]), la = j + 4 | 0, Nb = (E[0] = B[la >> 2], E[1] = B[la + 4 >> 2], D[0]), jb = j + 12 | 0, zb = (E[0] = B[jb >> 2], E[1] = B[jb + 4 >> 2], D[0]), sa = j + 20 | 0, fa = (E[0] = B[sa >> 2], E[1] = B[sa + 4 >> 2], D[0]), Ca = qe(Ib + $ * Nb, yb + $ * zb, Mb + $ * fa);
+    Ie(Y);
+    var aa = Ca;
+  } else {
+    aa = Y;
+  }
+  var kb = b + 24 | 0, Da = (E[0] = B[kb >> 2], E[1] = B[kb + 4 >> 2], D[0]);
+  if (0 < Da) {
+    var Wa = aa + 4 | 0, Ab = (E[0] = B[Wa >> 2], E[1] = B[Wa + 4 >> 2], D[0]), lb = aa + 12 | 0, Bb = (E[0] = B[lb >> 2], E[1] = B[lb + 4 >> 2], D[0]), Ja = aa + 20 | 0, mb = (E[0] = B[Ja >> 2], E[1] = B[Ja + 4 >> 2], D[0]), ta = j + 4 | 0, bb = (E[0] = B[ta >> 2], E[1] = B[ta + 4 >> 2], D[0]), ia = j + 12 | 0, Cb = (E[0] = B[ia >> 2], E[1] = B[ia + 4 >> 2], D[0]), ma = j + 20 | 0, Jb = (E[0] = B[ma >> 2], E[1] = B[ma + 4 >> 2], D[0]), Db = qe(Ab + Da * bb, Bb + Da * Cb, mb + Da * Jb);
+    Ie(aa);
+    Ie(j);
+    var cb = Db;
+  } else {
+    Ie(j), cb = aa;
+  }
+  return cb;
+}
+
+He.X = 1;
+
+function Je(b, d) {
+  var c = B[md >> 2];
+  nd(c);
+  var e = d + 4 | 0, e = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]), f = d + 12 | 0, f = (E[0] = B[f >> 2], E[1] = B[f + 4 >> 2], D[0]), i = d + 20 | 0, i = (E[0] = B[i >> 2], E[1] = B[i + 4 >> 2], D[0]), h = c + 4 | 0, h = (E[0] = B[h >> 2], E[1] = B[h + 4 >> 2], D[0]), j = c + 12 | 0, j = (E[0] = B[j >> 2], E[1] = B[j + 4 >> 2], D[0]), k = c + 20 | 0, k = (E[0] = B[k >> 2], E[1] = B[k + 4 >> 2], D[0]), e = vd(e, f, i, h, j, k);
+  Q(c);
+  c = 1 / (B[b + 36 >> 2] | 0);
+  f = e + 4 | 0;
+  f = (E[0] = B[f >> 2], E[1] = B[f + 4 >> 2], D[0]);
+  i = e + 12 | 0;
+  i = (E[0] = B[i >> 2], E[1] = B[i + 4 >> 2], D[0]);
+  h = e + 20 | 0;
+  h = (E[0] = B[h >> 2], E[1] = B[h + 4 >> 2], D[0]);
+  c = rd(f, i, h, c);
+  L(c);
+  c = 0 != ((0 > (((0 > i ? -i : i) + .5 & -1) + (((0 > h ? -h : h) + .5 & -1) + ((0 > f ? -f : f) + .5 & -1) | 0) | 0) ? ((((0 > i ? -i : i) + .5 & -1) + (((0 > h ? -h : h) + .5 & -1) + ((0 > f ? -f : f) + .5 & -1) | 0) | 0) + 1) % 2 + 1 | 0 : (((0 > i ? -i : i) + .5 & -1) + (((0 > h ? -h : h) + .5 & -1) + ((0 > f ? -f : f) + .5 & -1) | 0) | 0) % 2) | 0);
+  L(e);
+  if (c) {
+    return c = B[b + 4 >> 2], Ge(c, 1), c;
+  }
+  c = B[b + 16 >> 2];
+  Ge(c, 1);
+  return c;
+}
+
+Je.X = 1;
+
+function Ke(b, d, c, e, f) {
+  var i, h, j = Je(b, e);
+  h = (b + 28 | 0) >> 2;
+  if (0 < (E[0] = B[h], E[1] = B[h + 1], D[0])) {
+    var k = B[c + 4 >> 2];
+    gd(k);
+    var o = f + 4 | 0, s = (E[0] = B[o >> 2], E[1] = B[o + 4 >> 2], D[0]), p = f + 12 | 0, w = (E[0] = B[p >> 2], E[1] = B[p + 4 >> 2], D[0]), u = f + 20 | 0, x = (E[0] = B[u >> 2], E[1] = B[u + 4 >> 2], D[0]), v = hd(k, s, w, x);
+    L(k);
+    var t = ee();
+    yd(t, e, v);
+    L(v);
+    var y = fe(d, t), q = qe(0, 0, 0), z = (E[0] = B[h], E[1] = B[h + 1], D[0]), I = q + 4 | 0, T = (E[0] = B[I >> 2], E[1] = B[I + 4 >> 2], D[0]), X = q + 12 | 0, K = (E[0] = B[X >> 2], E[1] = B[X + 4 >> 2], D[0]), N = q + 20 | 0, H = (E[0] = B[N >> 2], E[1] = B[N + 4 >> 2], D[0]), U = y + 4 | 0, Za = (E[0] = B[U >> 2], E[1] = B[U + 4 >> 2], D[0]), ua = y + 12 | 0, Oa = (E[0] = B[ua >> 2], E[1] = B[ua + 4 >> 2], D[0]), da = y + 20 | 0, va = (E[0] = B[da >> 2], E[1] = B[da + 4 >> 2], D[0]), Pa = qe(T + z * Za, K + z * Oa, H + z * va);
+    Ie(q);
+    pe(t);
+    Ie(y);
+    var Y = Pa;
+  } else {
+    Y = qe(0, 0, 0);
+  }
+  i = (b + 8 | 0) >> 2;
+  if (0 < (E[0] = B[i], E[1] = B[i + 1], D[0])) {
+    var ob = xe(d, e), oa = Ae(ob);
+    Be(ob);
+    var pb = oa + 4 | 0, gb = oa + 8 | 0, hb = e + 4 | 0, Z = e + 12 | 0, Ha = e + 20 | 0, ha = f + 4 | 0, $a = f + 12 | 0, ib = f + 20 | 0, pa = 0;
+    a : for (;;) {
+      for (;;) {
+        if ((B[B[gb >> 2] + 8 >> 2] | 0) <= (B[pb >> 2] | 0)) {
+          break a;
+        }
+        var wa = Ce(oa), Qa = wa + 4 | 0, Hb = (E[0] = B[Qa >> 2], E[1] = B[Qa + 4 >> 2], D[0]), xa = wa + 12 | 0, Lb = (E[0] = B[xa >> 2], E[1] = B[xa + 4 >> 2], D[0]), R = wa + 20 | 0, S = (E[0] = B[R >> 2], E[1] = B[R + 4 >> 2], D[0]), ya = (E[0] = B[hb >> 2], E[1] = B[hb + 4 >> 2], D[0]), Ra = (E[0] = B[Z >> 2], E[1] = B[Z + 4 >> 2], D[0]), qb = (E[0] = B[Ha >> 2], E[1] = B[Ha + 4 >> 2], D[0]), ba = vd(Hb, Lb, S, ya, Ra, qb), rb = ba + 4 | 0, sb = (E[0] = B[rb >> 2], E[1] = B[rb + 4 >> 2], D[0]), qa = ba + 12 | 0, Sa = (E[0] = B[qa >> 2], E[1] = B[qa + 4 >> 2], D[0]), tb = ba + 20 | 0, Ta = (E[0] = B[tb >> 2], E[1] = B[tb + 4 >> 2], D[0]), ea = td(sb, Sa, Ta);
+        L(ba);
+        var Ia = ea + 4 | 0, ub = (E[0] = B[Ia >> 2], E[1] = B[Ia + 4 >> 2], D[0]), za = ea + 12 | 0, ka = (E[0] = B[za >> 2], E[1] = B[za + 4 >> 2], D[0]), Aa = ea + 20 | 0, Vb = (E[0] = B[Aa >> 2], E[1] = B[Aa + 4 >> 2], D[0]), vb = (E[0] = B[ha >> 2], E[1] = B[ha + 4 >> 2], D[0]), wb = (E[0] = B[$a >> 2], E[1] = B[$a + 4 >> 2], D[0]), xb = (E[0] = B[ib >> 2], E[1] = B[ib + 4 >> 2], D[0]), Ba = ub * vb + Vb * xb + ka * wb;
+        L(ea);
+        var M = 0 < Ba;
+        Q(wa);
+        if (M) {
+          break;
+        }
+      }
+      pa += Ba;
+    }
+    Ee(oa);
+    var ra = 1 < pa ? 1 : pa, $ = (E[0] = B[i], E[1] = B[i + 1], D[0]) * ra, Ua = Y + 4 | 0, Ib = (E[0] = B[Ua >> 2], E[1] = B[Ua + 4 >> 2], D[0]), ab = Y + 12 | 0, yb = (E[0] = B[ab >> 2], E[1] = B[ab + 4 >> 2], D[0]), Va = Y + 20 | 0, Mb = (E[0] = B[Va >> 2], E[1] = B[Va + 4 >> 2], D[0]), la = j + 4 | 0, Nb = (E[0] = B[la >> 2], E[1] = B[la + 4 >> 2], D[0]), jb = j + 12 | 0, zb = (E[0] = B[jb >> 2], E[1] = B[jb + 4 >> 2], D[0]), sa = j + 20 | 0, fa = (E[0] = B[sa >> 2], E[1] = B[sa + 4 >> 2], D[0]), Ca = qe(Ib + $ * Nb, yb + $ * zb, Mb + $ * fa);
+    Ie(Y);
+    var aa = Ca;
+  } else {
+    aa = Y;
+  }
+  var kb = b + 20 | 0, Da = (E[0] = B[kb >> 2], E[1] = B[kb + 4 >> 2], D[0]);
+  if (0 < Da) {
+    var Wa = aa + 4 | 0, Ab = (E[0] = B[Wa >> 2], E[1] = B[Wa + 4 >> 2], D[0]), lb = aa + 12 | 0, Bb = (E[0] = B[lb >> 2], E[1] = B[lb + 4 >> 2], D[0]), Ja = aa + 20 | 0, mb = (E[0] = B[Ja >> 2], E[1] = B[Ja + 4 >> 2], D[0]), ta = j + 4 | 0, bb = (E[0] = B[ta >> 2], E[1] = B[ta + 4 >> 2], D[0]), ia = j + 12 | 0, Cb = (E[0] = B[ia >> 2], E[1] = B[ia + 4 >> 2], D[0]), ma = j + 20 | 0, Jb = (E[0] = B[ma >> 2], E[1] = B[ma + 4 >> 2], D[0]), Db = qe(Ab + Da * bb, Bb + Da * Cb, mb + Da * Jb);
+    Ie(aa);
+    Ie(j);
+    var cb = Db;
+  } else {
+    Ie(j), cb = aa;
+  }
+  return cb;
+}
+
+Ke.X = 1;
+
+function pd() {
+  var b;
+  Le();
+  var d = Me();
+  B[je >> 2] = d;
+  var c = $c(Qc.I | 0, 13), d = J(20);
+  B[d >> 2] = 1;
+  var e = Ne();
+  Oe(e, 0);
+  b = Ne();
+  a : do {
+    for (var f = e + 8 | 0, i = e + 12 | 0, h = 921600; ; ) {
+      var j = b, k = B[f >> 2], o = B[i >> 2], s = 0 < (k | 0);
+      b : do {
+        if (s) {
+          for (var p = 0; ; ) {
+            if (Oe(j, B[o + (p << 2) >> 2]), p = p + 1 | 0, (p | 0) == (k | 0)) {
+              break b;
+            }
+          }
+        }
+      } while (0);
+      h = h - 1 | 0;
+      if (1 > (h | 0)) {
+        break a;
+      }
+    }
+  } while (0);
+  Pe(e);
+  Qe(b, 1);
+  e = d + 8 | 0;
+  B[e >> 2] = b;
+  Pe(b);
+  a : do {
+    for (h = 0; ; ) {
+      b = 1 + h | 0;
+      f = B[e >> 2];
+      Qe(f, 1);
+      i = f;
+      h = 2 + (3 * h | 0) | 0;
+      j = B[i + 8 >> 2];
+      k = (0 > (h | 0) ? j : 0) + h | 0;
+      0 > (k | 0) | (k | 0) >= (j | 0) && (Ve(h), a("Reached an unreachable!"));
+      B[((k << 2) + B[i + 12 >> 2] | 0) >> 2] = 255;
+      Pe(f);
+      if (307200 <= (b | 0)) {
+        break a;
+      }
+      h = b;
+    }
+  } while (0);
+  B[d + 4 >> 2] = 640;
+  B[d + 16 >> 2] = 480;
+  bd(c);
+  B[d + 12 >> 2] = c;
+  cd(c);
+  c = J(28);
+  B[c >> 2] = 1;
+  b = c >> 2;
+  e = J(16);
+  f = J(40);
+  B[e >> 2] = 1;
+  B[(e + 4 | 0) >> 2] = 10;
+  B[(e + 8 | 0) >> 2] = 0;
+  B[(e + 12 | 0) >> 2] = f;
+  Yd(e, 1);
+  B[b + 4] = e;
+  be(e);
+  e = ye();
+  ze(e, 1);
+  B[b + 3] = e;
+  Be(e);
+  e = ld();
+  Xc(e, 0, 1.8, 10);
+  nd(e);
+  B[b + 6] = e;
+  Q(e);
+  e = B[md >> 2];
+  nd(e);
+  nd(e);
+  B[b + 2] = e;
+  Q(e);
+  B[b + 1] = 45;
+  B[b + 5] = 0;
+  e = ld();
+  Xc(e, 30, 30, 10);
+  b = c + 12 | 0;
+  f = B[b >> 2];
+  ze(f, 1);
+  De(f, e);
+  Be(f);
+  Q(e);
+  e = ld();
+  Xc(e, -10, 100, 30);
+  b = B[b >> 2];
+  ze(b, 1);
+  De(b, e);
+  Be(b);
+  Q(e);
+  b = ld();
+  Xc(b, 0, 2, 0);
+  nd(b);
+  B[c + 8 >> 2] = b;
+  Q(b);
+  b = ld();
+  Xc(b, 1, 3, -10);
+  e = af();
+  wd(e, b, 2);
+  Q(b);
+  b = qe(1, 1, 0);
+  f = bf();
+  Fe(f, b);
+  Ie(b);
+  cf(e, 1);
+  i = df(e);
+  cf(e, 1);
+  h = ef(e);
+  ff(f, 1);
+  j = gf(f);
+  b = (c + 16 | 0) >> 2;
+  Xd(B[b], i, h, j);
+  Hd(i);
+  ue(h);
+  Jd(j);
+  hf(f);
+  jf(e);
+  a : do {
+    for (f = 0; ; ) {
+      e = 1 + f | 0;
+      i = f | 0;
+      f = -3 - .4 * i;
+      h = ld();
+      Xc(h, f, 2.3, -5);
+      f = af();
+      wd(f, h, .4);
+      Q(h);
+      i /= 6;
+      h = qe(i, 1 - i, .5);
+      i = bf();
+      Fe(i, h);
+      Ie(h);
+      cf(f, 1);
+      h = df(f);
+      cf(f, 1);
+      j = ef(f);
+      ff(i, 1);
+      k = gf(i);
+      Xd(B[b], h, j, k);
+      Hd(h);
+      ue(j);
+      Jd(k);
+      hf(i);
+      jf(f);
+      if (6 <= (e | 0)) {
+        break a;
+      }
+      f = e;
+    }
+  } while (0);
+  f = ld();
+  Xc(f, 0, 0, 0);
+  i = B[ed >> 2];
+  gd(i);
+  e = J(12);
+  B[e >> 2] = 1;
+  nd(f);
+  B[e + 8 >> 2] = f;
+  h = i + 4 | 0;
+  h = (E[0] = B[h >> 2], E[1] = B[h + 4 >> 2], D[0]);
+  j = i + 12 | 0;
+  j = (E[0] = B[j >> 2], E[1] = B[j + 4 >> 2], D[0]);
+  k = i + 20 | 0;
+  k = (E[0] = B[k >> 2], E[1] = B[k + 4 >> 2], D[0]);
+  h = td(h, j, k);
+  gd(h);
+  B[e + 4 >> 2] = h;
+  L(h);
+  Q(f);
+  L(i);
+  f = J(40);
+  B[f >> 2] = 1;
+  i = qe(1, 1, 1);
+  Ge(i, 1);
+  B[f + 16 >> 2] = i;
+  Ie(i);
+  i = f + 28 | 0;
+  D[0] = .2;
+  B[i >> 2] = E[0];
+  B[i + 4 >> 2] = E[1];
+  i = f + 8 | 0;
+  D[0] = .6;
+  B[i >> 2] = E[0];
+  B[i + 4 >> 2] = E[1];
+  i = f + 20 | 0;
+  D[0] = .8 - .6;
+  B[i >> 2] = E[0];
+  B[i + 4 >> 2] = E[1];
+  i = qe(0, 0, 0);
+  Ge(i, 1);
+  B[f + 4 >> 2] = i;
+  Ie(i);
+  B[f + 36 >> 2] = 1;
+  kf(e, 1);
+  i = J(20);
+  B[i >> 2] = 1;
+  B[(i + 4 | 0) >> 2] = 20;
+  B[(i + 8 | 0) >> 2] = 22;
+  B[(i + 12 | 0) >> 2] = e;
+  B[(i + 16 | 0) >> 2] = 24;
+  kf(e, 1);
+  h = J(20);
+  B[h >> 2] = 1;
+  B[(h + 4 | 0) >> 2] = 26;
+  B[(h + 8 | 0) >> 2] = 28;
+  B[(h + 12 | 0) >> 2] = e;
+  B[(h + 16 | 0) >> 2] = 30;
+  lf(f, 1);
+  j = J(20);
+  B[j >> 2] = 1;
+  B[(j + 4 | 0) >> 2] = 32;
+  B[(j + 8 | 0) >> 2] = 34;
+  B[(j + 12 | 0) >> 2] = f;
+  B[(j + 16 | 0) >> 2] = 36;
+  Xd(B[b], i, h, j);
+  Hd(i);
+  ue(h);
+  Jd(j);
+  ce(c, d);
+  mf(f);
+  b = c | 0;
+  f = B[b >> 2] - 1 | 0;
+  B[b >> 2] = f;
+  1 > (f | 0) && (0 > (f | 0) && (O(), a("Reached an unreachable!")), P(c));
+  nf(e);
+  c = d | 0;
+  b = B[c >> 2] - 1 | 0;
+  B[c >> 2] = b;
+  1 > (b | 0) && (0 > (b | 0) && (O(), a("Reached an unreachable!")), P(d));
+}
+
+pd.X = 1;
+
+function Ne() {
+  var b = J(16), d = J(40);
+  B[b >> 2] = 1;
+  B[(b + 4 | 0) >> 2] = 10;
+  B[(b + 8 | 0) >> 2] = 0;
+  B[(b + 12 | 0) >> 2] = d;
+  return b;
+}
+
+function Oe(b, d) {
+  var c = b + 4 | 0, e = b + 8 | 0, f = b + 12 | 0, i = B[c >> 2], h = B[e >> 2], j = B[f >> 2];
+  (h | 0) < (i | 0) || (i <<= 1, j = ad(j, i << 2 | 0), B[f >> 2] = j, B[c >> 2] = i);
+  c = j;
+  B[((h << 2) + c | 0) >> 2] = d;
+  B[e >> 2] = h + 1 | 0;
+}
+
+function Qe(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function of(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function pf(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function cf(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function kf(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function Bd(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function ze(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function Zd(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function Ge(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function Cd(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function $d(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function Yd(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function Vd(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function ld() {
+  var b = J(28);
+  B[b >> 2] = 1;
+  return b;
+}
+
+function nd(b) {
+  of(b, 1);
+}
+
+function dd() {
+  var b = J(28);
+  B[b >> 2] = 1;
+  return b;
+}
+
+function gd(b) {
+  pf(b, 1);
+}
+
+function af() {
+  var b = J(16);
+  B[b >> 2] = 1;
+  return b;
+}
+
+function ee() {
+  var b = J(12);
+  B[b >> 2] = 1;
+  return b;
+}
+
+function ye() {
+  var b = J(16), d = J(40);
+  B[b >> 2] = 1;
+  B[(b + 4 | 0) >> 2] = 10;
+  B[(b + 8 | 0) >> 2] = 0;
+  B[(b + 12 | 0) >> 2] = d;
+  return b;
+}
+
+function De(b, d) {
+  var c = b + 4 | 0, e = b + 8 | 0, f = b + 12 | 0, i = B[c >> 2], h = B[e >> 2], j = B[f >> 2];
+  (h | 0) < (i | 0) || (i <<= 1, j = ad(j, i << 2 | 0), B[f >> 2] = j, B[c >> 2] = i);
+  c = j;
+  B[((h << 2) + c | 0) >> 2] = d;
+  B[e >> 2] = h + 1 | 0;
+  nd(d);
+}
+
+function Ae(b) {
+  var d = J(12);
+  B[d >> 2] = 1;
+  B[(d + 4 | 0) >> 2] = 0;
+  B[(d + 8 | 0) >> 2] = b;
+  ze(b, 1);
+  return d;
+}
+
+function Ce(b) {
+  var d = b + 4 | 0, c = B[d >> 2], b = B[b + 8 >> 2], e = B[b + 8 >> 2], f = (0 > (c | 0) ? e : 0) + c | 0;
+  0 > (f | 0) | (f | 0) >= (e | 0) && (Ve(c), a("Reached an unreachable!"));
+  b = B[B[b + 12 >> 2] + (f << 2) >> 2];
+  nd(b);
+  B[d >> 2] = c + 1 | 0;
+  return b;
+}
+
+function qe(b, d, c) {
+  var e = J(28);
+  B[e >> 2] = 1;
+  var f = e + 4 | 0;
+  D[0] = b;
+  B[f >> 2] = E[0];
+  B[f + 4 >> 2] = E[1];
+  b = e + 12 | 0;
+  D[0] = d;
+  B[b >> 2] = E[0];
+  B[b + 4 >> 2] = E[1];
+  d = e + 20 | 0;
+  D[0] = c;
+  B[d >> 2] = E[0];
+  B[d + 4 >> 2] = E[1];
+  return e;
+}
+
+function re(b) {
+  var d = J(12);
+  B[d >> 2] = 1;
+  B[(d + 4 | 0) >> 2] = 0;
+  B[(d + 8 | 0) >> 2] = b;
+  Yd(b, 1);
+  return d;
+}
+
+function se(b) {
+  var d = b + 4 | 0, c = B[d >> 2], b = B[b + 8 >> 2], e = B[b + 8 >> 2], f = (0 > (c | 0) ? e : 0) + c | 0;
+  0 > (f | 0) | (f | 0) >= (e | 0) && (Ve(c), a("Reached an unreachable!"));
+  b = B[B[b + 12 >> 2] + (f << 2) >> 2];
+  $d(b, 1);
+  B[d >> 2] = c + 1 | 0;
+  return b;
+}
+
+function Gd(b, d, c) {
+  var e = J(20);
+  B[e >> 2] = 1;
+  var f = e + 4 | 0;
+  Bd(b, 1);
+  B[f >> 2] = b;
+  b = e + 8 | 0;
+  D[0] = d;
+  B[b >> 2] = E[0];
+  B[b + 4 >> 2] = E[1];
+  d = e + 16 | 0;
+  Cd(c, 1);
+  B[d >> 2] = c;
+  return e;
+}
+
+function Pe(b) {
+  var d = Qe(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), P(B[b + 12 >> 2]), P(b));
+}
+
+function Q(b) {
+  var d = of(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), P(b));
+}
+
+function L(b) {
+  var d = pf(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), P(b));
+}
+
+function jf(b) {
+  var d = cf(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), P(b));
+}
+
+function pe(b) {
+  var d = b | 0, c = B[d >> 2] - 1 | 0;
+  B[d >> 2] = c;
+  1 > (c | 0) && (0 > (c | 0) && (O(), a("Reached an unreachable!")), P(b));
+}
+
+function nf(b) {
+  var d = kf(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), P(b));
+}
+
+function Hd(b) {
+  var d = Bd(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), zc[B[b + 8 >> 2]](b), P(b));
+}
+
+function Be(b) {
+  var d = ze(b, -1);
+  if (1 > (d | 0)) {
+    0 > (d | 0) && (O(), a("Reached an unreachable!"));
+    var d = B[b + 12 >> 2], c = B[b + 8 >> 2], e = 0 < (c | 0);
+    a : do {
+      if (e) {
+        for (var f = 0; ; ) {
+          if (Q(B[d + (f << 2) >> 2]), f = f + 1 | 0, (f | 0) == (c | 0)) {
+            break a;
+          }
+        }
+      }
+    } while (0);
+    P(d);
+    P(b);
+  }
+}
+
+function Ee(b) {
+  var d = b | 0, c = B[d >> 2] - 1 | 0;
+  B[d >> 2] = c;
+  1 > (c | 0) && (0 > (c | 0) && (O(), a("Reached an unreachable!")), Be(B[b + 8 >> 2]), P(b));
+}
+
+function ue(b) {
+  var d = Zd(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), zc[B[b + 8 >> 2]](b), P(b));
+}
+
+function Ie(b) {
+  var d = Ge(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), P(b));
+}
+
+function Jd(b) {
+  var d = Cd(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), zc[B[b + 8 >> 2]](b), P(b));
+}
+
+function ae(b) {
+  var d = $d(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), Hd(B[b + 4 >> 2]), ue(B[b + 8 >> 2]), Jd(B[b + 12 >> 2]), P(b));
+}
+
+function be(b) {
+  var d = Yd(b, -1);
+  if (1 > (d | 0)) {
+    0 > (d | 0) && (O(), a("Reached an unreachable!"));
+    var d = B[b + 12 >> 2], c = B[b + 8 >> 2], e = 0 < (c | 0);
+    a : do {
+      if (e) {
+        for (var f = 0; ; ) {
+          if (ae(B[d + (f << 2) >> 2]), f = f + 1 | 0, (f | 0) == (c | 0)) {
+            break a;
+          }
+        }
+      }
+    } while (0);
+    P(d);
+    P(b);
+  }
+}
+
+function ve(b) {
+  var d = b | 0, c = B[d >> 2] - 1 | 0;
+  B[d >> 2] = c;
+  1 > (c | 0) && (0 > (c | 0) && (O(), a("Reached an unreachable!")), be(B[b + 8 >> 2]), P(b));
+}
+
+function Dd(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function ff(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function lf(b, d) {
+  var c = b | 0, e = B[c >> 2] + d | 0;
+  return B[c >> 2] = e;
+}
+
+function bd(b) {
+  b |= 0;
+  B[b >> 2] = B[b >> 2] + 1 | 0;
+}
+
+function bf() {
+  var b = J(32);
+  B[b >> 2] = 1;
+  return b;
+}
+
+function df(b) {
+  var d = J(20);
+  B[d >> 2] = 1;
+  B[(d + 4 | 0) >> 2] = 2;
+  B[(d + 8 | 0) >> 2] = 4;
+  B[(d + 12 | 0) >> 2] = b;
+  B[(d + 16 | 0) >> 2] = 6;
+  return d;
+}
+
+function ef(b) {
+  var d = J(20);
+  B[d >> 2] = 1;
+  B[(d + 4 | 0) >> 2] = 8;
+  B[(d + 8 | 0) >> 2] = 10;
+  B[(d + 12 | 0) >> 2] = b;
+  B[(d + 16 | 0) >> 2] = 12;
+  return d;
+}
+
+function gf(b) {
+  var d = J(20);
+  B[d >> 2] = 1;
+  B[(d + 4 | 0) >> 2] = 14;
+  B[(d + 8 | 0) >> 2] = 16;
+  B[(d + 12 | 0) >> 2] = b;
+  B[(d + 16 | 0) >> 2] = 18;
+  return d;
+}
+
+function jd() {
+  var b, d = n, c = J(64);
+  b = c >> 2;
+  B[b] = 1;
+  var e = c + 24 | 0;
+  B[b + 4] = e;
+  for (var f = Qc.C | 0, i = (kc = n, n += 4, B[kc >> 2] = jc, kc), f = qf(f, i), i = Math.min(f.length, 39), h = 0; h < i; h++) {
+    r[e + h] = f[h];
+  }
+  r[e + h] = 0;
+  B[b + 2] = f.length;
+  n = d;
+  return c;
+}
+
+function $c(b, d) {
+  var c, e = J(24);
+  c = e >> 2;
+  B[c] = 1;
+  B[c + 2] = d;
+  B[c + 4] = b;
+  return e;
+}
+
+function od() {
+  var b = n;
+  n += 8;
+  var d = Gb(), c = Date.now();
+  B[b + d[0] >> 2] = Math.floor(c / 1e3);
+  B[b + d[1] >> 2] = Math.floor(1e3 * (c - 1e3 * Math.floor(c / 1e3)));
+  d = (B[b >> 2] | 0) + 1e-6 * (B[b + 4 >> 2] | 0);
+  n = b;
+  return d;
+}
+
+function te(b) {
+  var d = Vd(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), Hd(B[b + 4 >> 2]), Jd(B[b + 16 >> 2]), P(b));
+}
+
+function Ad(b, d) {
+  var c = B[b + 8 >> 2], e = (0 > (d | 0) ? c : 0) + d | 0;
+  0 > (e | 0) | (e | 0) >= (c | 0) && (Ve(d), a("Reached an unreachable!"));
+  c = B[B[b + 12 >> 2] + (e << 2) >> 2];
+  Vd(c, 1);
+  return c;
+}
+
+function Wd(b) {
+  var d = Dd(b, -1);
+  if (1 > (d | 0)) {
+    0 > (d | 0) && (O(), a("Reached an unreachable!"));
+    var d = B[b + 12 >> 2], c = B[b + 8 >> 2], e = 0 < (c | 0);
+    a : do {
+      if (e) {
+        for (var f = 0; ; ) {
+          if (te(B[d + (f << 2) >> 2]), f = f + 1 | 0, (f | 0) == (c | 0)) {
+            break a;
+          }
+        }
+      }
+    } while (0);
+    P(d);
+    P(b);
+  }
+}
+
+function hf(b) {
+  var d = ff(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), P(b));
+}
+
+function mf(b) {
+  var d = lf(b, -1);
+  1 > (d | 0) && (0 > (d | 0) && (O(), a("Reached an unreachable!")), P(b));
+}
+
+function cd(b) {
+  var d = b | 0, c = B[d >> 2] - 1 | 0;
+  B[d >> 2] = c;
+  1 > (c | 0) && (0 > (c | 0) && (O(), a("Reached an unreachable!")), P(b));
+}
+
+function Ve(b) {
+  kd(Qc.D | 0, (kc = n, n += 4, B[kc >> 2] = b, kc));
+  rf(-1);
+  a("Reached an unreachable!");
+}
+
+function O() {
+  var b = B[sf >> 2], d = Qc.F | 0;
+  0 > tf(b, d, Pc(d)) || (r[uf] = Rc(10), -1 == tf(b, uf, 1) && b in vf && (vf[b].error = g));
+  rf(-2);
+  a("Reached an unreachable!");
+}
+
+function J(b) {
+  if (245 > b >>> 0) {
+    var d = 11 > b >>> 0 ? 16 : b + 11 & -8, c = d >>> 3, b = C[V >> 2], e = b >>> (c >>> 0);
+    if (0 != (e & 3 | 0)) {
+      var f = (e & 1 ^ 1) + c | 0, d = f << 1, c = (d << 2) + V + 40 | 0, i = (d + 2 << 2) + V + 40 | 0, e = C[i >> 2], d = e + 8 | 0, h = C[d >> 2];
+      (c | 0) == (h | 0) ? B[V >> 2] = b & (1 << f ^ -1) : (h >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[i >> 2] = h, B[h + 12 >> 2] = c);
+      b = f << 3;
+      B[e + 4 >> 2] = b | 3;
+      b = e + (b | 4) | 0;
+      B[b >> 2] |= 1;
+      f = d;
+      b = 39;
+    } else {
+      if (d >>> 0 > C[V + 8 >> 2] >>> 0) {
+        if (0 != (e | 0)) {
+          var f = 2 << c, f = e << c & (f | -f), c = (f & -f) - 1 | 0, f = c >>> 12 & 16, e = c >>> (f >>> 0), c = e >>> 5 & 8, i = e >>> (c >>> 0), e = i >>> 2 & 4, h = i >>> (e >>> 0), i = h >>> 1 & 2, h = h >>> (i >>> 0), j = h >>> 1 & 1, c = (c | f | e | i | j) + (h >>> (j >>> 0)) | 0, f = c << 1, i = (f << 2) + V + 40 | 0, h = (f + 2 << 2) + V + 40 | 0, e = C[h >> 2], f = e + 8 | 0, j = C[f >> 2];
+          (i | 0) == (j | 0) ? B[V >> 2] = b & (1 << c ^ -1) : (j >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[h >> 2] = j, B[j + 12 >> 2] = i);
+          i = c << 3;
+          b = i - d | 0;
+          B[e + 4 >> 2] = d | 3;
+          c = e + d | 0;
+          B[e + (d | 4) >> 2] = b | 1;
+          B[e + i >> 2] = b;
+          j = C[V + 8 >> 2];
+          0 != (j | 0) && (d = B[V + 20 >> 2], i = j >>> 2 & 1073741822, e = (i << 2) + V + 40 | 0, h = C[V >> 2], j = 1 << (j >>> 3), 0 == (h & j | 0) ? (B[V >> 2] = h | j, h = e, i = (i + 2 << 2) + V + 40 | 0) : (i = (i + 2 << 2) + V + 40 | 0, h = C[i >> 2], h >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"))), B[i >> 2] = d, B[h + 12 >> 2] = d, B[(d + 8 | 0) >> 2] = h, B[(d + 12 | 0) >> 2] = e);
+          B[V + 8 >> 2] = b;
+          B[V + 20 >> 2] = c;
+          b = 39;
+        } else {
+          0 == (B[V + 4 >> 2] | 0) ? (k = d, b = 31) : (b = wf(d), 0 == (b | 0) ? (k = d, b = 31) : (f = b, b = 39));
+        }
+      } else {
+        var k = d, b = 31;
+      }
+    }
+  } else {
+    4294967231 < b >>> 0 ? (k = -1, b = 31) : (b = b + 11 & -8, 0 == (B[V + 4 >> 2] | 0) ? (k = b, b = 31) : (d = xf(b), 0 == (d | 0) ? (k = b, b = 31) : (f = d, b = 39)));
+  }
+  31 == b && (d = C[V + 8 >> 2], k >>> 0 > d >>> 0 ? (b = C[V + 12 >> 2], k >>> 0 < b >>> 0 ? (b = b - k | 0, B[V + 12 >> 2] = b, d = C[V + 24 >> 2], B[V + 24 >> 2] = d + k | 0, B[k + (d + 4) >> 2] = b | 1, B[d + 4 >> 2] = k | 3, f = d + 8 | 0) : f = yf(k)) : (f = d - k | 0, b = C[V + 20 >> 2], 15 < f >>> 0 ? (B[V + 20 >> 2] = b + k | 0, B[V + 8 >> 2] = f, B[k + (b + 4) >> 2] = f | 1, B[b + d >> 2] = f, B[b + 4 >> 2] = k | 3) : (B[V + 8 >> 2] = 0, B[V + 20 >> 2] = 0, B[b + 4 >> 2] = d | 3, k = d + (b + 4) | 0, B[k >> 2] |= 1), f = b + 8 | 0));
+  return f;
+}
+
+Module._malloc = J;
+
+J.X = 1;
+
+function wf(b) {
+  var d, c, e = B[V + 4 >> 2], f = (e & -e) - 1 | 0, e = f >>> 12 & 16, i = f >>> (e >>> 0), f = i >>> 5 & 8;
+  c = i >>> (f >>> 0);
+  var i = c >>> 2 & 4, h = c >>> (i >>> 0);
+  c = h >>> 1 & 2;
+  var h = h >>> (c >>> 0), j = h >>> 1 & 1, e = i = f = C[V + ((f | e | i | c | j) + (h >>> (j >>> 0)) << 2) + 304 >> 2];
+  c = e >> 2;
+  for (f = (B[f + 4 >> 2] & -8) - b | 0; ; ) {
+    h = B[i + 16 >> 2];
+    if (0 == (h | 0)) {
+      if (i = B[i + 20 >> 2], 0 == (i | 0)) {
+        break;
+      }
+    } else {
+      i = h;
+    }
+    h = (B[i + 4 >> 2] & -8) - b | 0;
+    f = (c = h >>> 0 < f >>> 0) ? h : f;
+    e = c ? i : e;
+    c = e >> 2;
+  }
+  var h = e, k = C[V + 16 >> 2], j = h >>> 0 < k >>> 0;
+  do {
+    if (!j) {
+      var o = h + b | 0, i = o;
+      if (h >>> 0 < o >>> 0) {
+        var j = C[c + 6], o = C[c + 3], s = (o | 0) == (e | 0);
+        do {
+          if (s) {
+            d = e + 20 | 0;
+            var p = B[d >> 2];
+            if (0 == (p | 0) && (d = e + 16 | 0, p = B[d >> 2], 0 == (p | 0))) {
+              p = 0;
+              d = p >> 2;
+              break;
+            }
+            for (;;) {
+              var w = p + 20 | 0, u = B[w >> 2];
+              if (0 == (u | 0) && (w = p + 16 | 0, u = C[w >> 2], 0 == (u | 0))) {
+                break;
+              }
+              d = w;
+              p = u;
+            }
+            d >>> 0 < k >>> 0 && (W(), a("Reached an unreachable!"));
+            B[d >> 2] = 0;
+          } else {
+            d = C[c + 2], d >>> 0 < k >>> 0 && (W(), a("Reached an unreachable!")), B[d + 12 >> 2] = o, B[o + 8 >> 2] = d, p = o;
+          }
+          d = p >> 2;
+        } while (0);
+        k = 0 == (j | 0);
+        a : do {
+          if (!k) {
+            o = e + 28 | 0;
+            s = (B[o >> 2] << 2) + V + 304 | 0;
+            w = (e | 0) == (B[s >> 2] | 0);
+            do {
+              if (w) {
+                B[s >> 2] = p;
+                if (0 != (p | 0)) {
+                  break;
+                }
+                B[V + 4 >> 2] &= 1 << B[o >> 2] ^ -1;
+                break a;
+              }
+              j >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+              u = j + 16 | 0;
+              (B[u >> 2] | 0) == (e | 0) ? B[u >> 2] = p : B[j + 20 >> 2] = p;
+              if (0 == (p | 0)) {
+                break a;
+              }
+            } while (0);
+            p >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+            B[d + 6] = j;
+            o = C[c + 4];
+            0 != (o | 0) && (o >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[d + 4] = o, B[o + 24 >> 2] = p);
+            o = C[c + 5];
+            0 != (o | 0) && (o >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[d + 5] = o, B[o + 24 >> 2] = p);
+          }
+        } while (0);
+        16 > f >>> 0 ? (b = f + b | 0, B[c + 1] = b | 3, b = b + (h + 4) | 0, B[b >> 2] |= 1) : (B[c + 1] = b | 3, B[b + (h + 4) >> 2] = f | 1, B[h + f + b >> 2] = f, k = C[V + 8 >> 2], 0 != (k | 0) && (b = C[V + 20 >> 2], h = k >>> 2 & 1073741822, c = (h << 2) + V + 40 | 0, j = C[V >> 2], k = 1 << (k >>> 3), 0 == (j & k | 0) ? (B[V >> 2] = j | k, j = c, h = (h + 2 << 2) + V + 40 | 0) : (h = (h + 2 << 2) + V + 40 | 0, j = C[h >> 2], j >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"))), B[h >> 2] = b, B[j + 12 >> 2] = b, B[b + 8 >> 2] = j, B[b + 12 >> 2] = c), B[V + 8 >> 2] = f, B[V + 20 >> 2] = i);
+        return e + 8 | 0;
+      }
+    }
+  } while (0);
+  W();
+  a("Reached an unreachable!");
+}
+
+wf.X = 1;
+
+function yf(b) {
+  var d, c;
+  0 == (B[zf >> 2] | 0) && Af();
+  var e = 0 == (B[V + 440 >> 2] & 4 | 0);
+  a : do {
+    if (e) {
+      c = B[V + 24 >> 2];
+      if (0 == (c | 0)) {
+        c = 7;
+      } else {
+        if (c = Bf(c), 0 == (c | 0)) {
+          c = 7;
+        } else {
+          var f = B[zf + 8 >> 2], f = b + 47 - B[V + 12 >> 2] + f & -f;
+          if (2147483647 > f >>> 0) {
+            var i = Cf(f), h = (d = (i | 0) == (B[c >> 2] + B[c + 4 >> 2] | 0)) ? i : -1;
+            d = d ? f : 0;
+            var j = f;
+            c = 14;
+          } else {
+            var k = 0;
+            c = 22;
+          }
+        }
+      }
+      if (7 == c) {
+        if (c = Cf(0), -1 == (c | 0)) {
+          k = 0, c = 22;
+        } else {
+          var f = B[zf + 8 >> 2], f = f + (b + 47) & -f, o = c, s = B[zf + 4 >> 2], p = s - 1 | 0, f = 0 == (p & o | 0) ? f : f - o + (p + o & -s) | 0;
+          2147483647 > f >>> 0 ? (i = Cf(f), d = (h = (i | 0) == (c | 0)) ? f : 0, h = h ? c : -1, j = f, c = 14) : (k = 0, c = 22);
+        }
+      }
+      b : do {
+        if (14 == c) {
+          k = -j | 0;
+          if (-1 != (h | 0)) {
+            var w = d, u = h;
+            c = 27;
+            break a;
+          }
+          c = -1 != (i | 0) & 2147483647 > j >>> 0;
+          do {
+            if (c) {
+              if (j >>> 0 < (b + 48 | 0) >>> 0) {
+                if (f = B[zf + 8 >> 2], f = b + 47 - j + f & -f, 2147483647 > f >>> 0) {
+                  if (-1 == (Cf(f) | 0)) {
+                    Cf(k);
+                    k = d;
+                    break b;
+                  }
+                  f = f + j | 0;
+                } else {
+                  f = j;
+                }
+              } else {
+                f = j;
+              }
+            } else {
+              f = j;
+            }
+          } while (0);
+          if (-1 != (i | 0)) {
+            w = f;
+            u = i;
+            c = 27;
+            break a;
+          }
+          B[V + 440 >> 2] |= 4;
+          var x = d;
+          c = 24;
+          break a;
+        }
+      } while (0);
+      B[V + 440 >> 2] |= 4;
+      x = k;
+    } else {
+      x = 0;
+    }
+    c = 24;
+  } while (0);
+  24 == c && (e = B[zf + 8 >> 2], e = e + (b + 47) & -e, 2147483647 > e >>> 0 ? (e = Cf(e), h = Cf(0), -1 != (h | 0) & -1 != (e | 0) & e >>> 0 < h >>> 0 ? (d = h - e | 0, x = (h = d >>> 0 > (b + 40 | 0) >>> 0) ? d : x, e = h ? e : -1, -1 == (e | 0) ? c = 50 : (w = x, u = e, c = 27)) : c = 50) : c = 50);
+  a : do {
+    if (27 == c) {
+      x = B[V + 432 >> 2] + w | 0;
+      B[V + 432 >> 2] = x;
+      x >>> 0 > C[V + 436 >> 2] >>> 0 && (B[V + 436 >> 2] = x);
+      x = C[V + 24 >> 2];
+      e = 0 == (x | 0);
+      b : do {
+        if (e) {
+          h = C[V + 16 >> 2];
+          0 == (h | 0) | u >>> 0 < h >>> 0 && (B[V + 16 >> 2] = u);
+          B[V + 444 >> 2] = u;
+          B[V + 448 >> 2] = w;
+          B[V + 456 >> 2] = 0;
+          B[V + 36 >> 2] = B[zf >> 2];
+          B[V + 32 >> 2] = -1;
+          for (h = 0; !(d = h << 1, j = (d << 2) + V + 40 | 0, B[V + (d + 3 << 2) + 40 >> 2] = j, B[V + (d + 2 << 2) + 40 >> 2] = j, h = h + 1 | 0, 32 == (h | 0)); ) {}
+          Df(u, w - 40 | 0);
+        } else {
+          j = V + 444 | 0;
+          for (d = j >> 2; 0 != (j | 0); ) {
+            h = C[d];
+            j = j + 4 | 0;
+            i = C[j >> 2];
+            if ((u | 0) == (h + i | 0)) {
+              if (0 != (B[d + 3] & 8 | 0)) {
+                break;
+              }
+              d = x;
+              if (!(d >>> 0 >= h >>> 0 & d >>> 0 < u >>> 0)) {
+                break;
+              }
+              B[j >> 2] = i + w | 0;
+              Df(B[V + 24 >> 2], B[V + 12 >> 2] + w | 0);
+              break b;
+            }
+            j = B[d + 2];
+            d = j >> 2;
+          }
+          u >>> 0 < C[V + 16 >> 2] >>> 0 && (B[V + 16 >> 2] = u);
+          h = u + w | 0;
+          for (d = V + 444 | 0; 0 != (d | 0); ) {
+            j = d | 0;
+            if ((B[j >> 2] | 0) == (h | 0)) {
+              if (0 != (B[d + 12 >> 2] & 8 | 0)) {
+                break;
+              }
+              B[j >> 2] = u;
+              var v = d + 4 | 0;
+              B[v >> 2] = B[v >> 2] + w | 0;
+              v = Ef(u, h, b);
+              c = 51;
+              break a;
+            }
+            d = B[d + 8 >> 2];
+          }
+          Ff(u, w);
+        }
+      } while (0);
+      x = C[V + 12 >> 2];
+      x >>> 0 > b >>> 0 ? (v = x - b | 0, B[V + 12 >> 2] = v, e = x = C[V + 24 >> 2], B[V + 24 >> 2] = e + b | 0, B[b + (e + 4) >> 2] = v | 1, B[x + 4 >> 2] = b | 3, v = x + 8 | 0, c = 51) : c = 50;
+    }
+  } while (0);
+  50 == c && (B[Gf >> 2] = 12, v = 0);
+  return v;
+}
+
+yf.X = 1;
+
+function xf(b) {
+  var d, c, e, f, i, h = b >> 2, j, k = -b | 0, o = b >>> 8;
+  if (0 == (o | 0)) {
+    var s = 0;
+  } else {
+    if (16777215 < b >>> 0) {
+      s = 31;
+    } else {
+      var p = (o + 1048320 | 0) >>> 16 & 8, w = o << p, u = (w + 520192 | 0) >>> 16 & 4, x = w << u, v = (x + 245760 | 0) >>> 16 & 2, t = 14 - (u | p | v) + (x << v >>> 15) | 0, s = b >>> ((t + 7 | 0) >>> 0) & 1 | t << 1;
+    }
+  }
+  var y = C[V + (s << 2) + 304 >> 2], q = 0 == (y | 0);
+  a : do {
+    if (q) {
+      var z = 0, I = k, T = 0;
+    } else {
+      var X = 31 == (s | 0) ? 0 : 25 - (s >>> 1) | 0, K = 0, N = k, H = y;
+      i = H >> 2;
+      for (var U = b << X, Za = 0; ; ) {
+        var ua = B[i + 1] & -8, Oa = ua - b | 0;
+        if (Oa >>> 0 < N >>> 0) {
+          if ((ua | 0) == (b | 0)) {
+            z = H;
+            I = Oa;
+            T = H;
+            break a;
+          }
+          var da = H, va = Oa;
+        } else {
+          da = K, va = N;
+        }
+        var Pa = C[i + 5], Y = C[((U >>> 31 << 2) + 16 >> 2) + i], ob = 0 == (Pa | 0) | (Pa | 0) == (Y | 0) ? Za : Pa;
+        if (0 == (Y | 0)) {
+          z = da;
+          I = va;
+          T = ob;
+          break a;
+        }
+        K = da;
+        N = va;
+        H = Y;
+        i = H >> 2;
+        U <<= 1;
+        Za = ob;
+      }
+    }
+  } while (0);
+  if (0 == (T | 0) & 0 == (z | 0)) {
+    var oa = 2 << s, pb = B[V + 4 >> 2] & (oa | -oa);
+    if (0 == (pb | 0)) {
+      var gb = 0;
+      j = 80;
+    } else {
+      var hb = (pb & -pb) - 1 | 0, Z = hb >>> 12 & 16, Ha = hb >>> (Z >>> 0), ha = Ha >>> 5 & 8, $a = Ha >>> (ha >>> 0), ib = $a >>> 2 & 4, pa = $a >>> (ib >>> 0), wa = pa >>> 1 & 2, Qa = pa >>> (wa >>> 0), Hb = Qa >>> 1 & 1, xa = B[V + ((ha | Z | ib | wa | Hb) + (Qa >>> (Hb >>> 0)) << 2) + 304 >> 2];
+      j = 15;
+    }
+  } else {
+    xa = T, j = 15;
+  }
+  a : do {
+    if (15 == j) {
+      var Lb = 0 == (xa | 0);
+      b : do {
+        if (Lb) {
+          var R = I, S = z;
+          f = S >> 2;
+        } else {
+          var ya = xa;
+          e = ya >> 2;
+          for (var Ra = I, qb = z; ; ) {
+            var ba = (B[e + 1] & -8) - b | 0, rb = ba >>> 0 < Ra >>> 0, sb = rb ? ba : Ra, qa = rb ? ya : qb, Sa = C[e + 4];
+            if (0 != (Sa | 0)) {
+              ya = Sa;
+            } else {
+              var tb = C[e + 5];
+              if (0 == (tb | 0)) {
+                R = sb;
+                S = qa;
+                f = S >> 2;
+                break b;
+              }
+              ya = tb;
+            }
+            e = ya >> 2;
+            Ra = sb;
+            qb = qa;
+          }
+        }
+      } while (0);
+      if (0 != (S | 0) && R >>> 0 < (B[V + 8 >> 2] - b | 0) >>> 0) {
+        var Ta = S;
+        c = Ta >> 2;
+        var ea = C[V + 16 >> 2], Ia = Ta >>> 0 < ea >>> 0;
+        do {
+          if (!Ia) {
+            var ub = Ta + b | 0, za = ub;
+            if (Ta >>> 0 < ub >>> 0) {
+              var ka = C[f + 6], Aa = C[f + 3], Vb = (Aa | 0) == (S | 0);
+              do {
+                if (Vb) {
+                  var vb = S + 20 | 0, wb = B[vb >> 2];
+                  if (0 == (wb | 0)) {
+                    var xb = S + 16 | 0, Ba = B[xb >> 2];
+                    if (0 == (Ba | 0)) {
+                      var M = 0;
+                      d = M >> 2;
+                      break;
+                    }
+                    var ra = xb, $ = Ba;
+                  } else {
+                    ra = vb, $ = wb, j = 28;
+                  }
+                  for (;;) {
+                    var Ua = $ + 20 | 0, Ib = B[Ua >> 2];
+                    if (0 != (Ib | 0)) {
+                      ra = Ua, $ = Ib;
+                    } else {
+                      var ab = $ + 16 | 0, yb = C[ab >> 2];
+                      if (0 == (yb | 0)) {
+                        break;
+                      }
+                      ra = ab;
+                      $ = yb;
+                    }
+                  }
+                  ra >>> 0 < ea >>> 0 && (W(), a("Reached an unreachable!"));
+                  B[ra >> 2] = 0;
+                  M = $;
+                } else {
+                  var Va = C[f + 2];
+                  Va >>> 0 < ea >>> 0 && (W(), a("Reached an unreachable!"));
+                  B[Va + 12 >> 2] = Aa;
+                  B[Aa + 8 >> 2] = Va;
+                  M = Aa;
+                }
+                d = M >> 2;
+              } while (0);
+              var Mb = 0 == (ka | 0);
+              b : do {
+                if (Mb) {
+                  var la = S;
+                } else {
+                  var Nb = S + 28 | 0, jb = (B[Nb >> 2] << 2) + V + 304 | 0, zb = (S | 0) == (B[jb >> 2] | 0);
+                  do {
+                    if (zb) {
+                      B[jb >> 2] = M;
+                      if (0 != (M | 0)) {
+                        break;
+                      }
+                      B[V + 4 >> 2] &= 1 << B[Nb >> 2] ^ -1;
+                      la = S;
+                      break b;
+                    }
+                    ka >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                    var sa = ka + 16 | 0;
+                    (B[sa >> 2] | 0) == (S | 0) ? B[sa >> 2] = M : B[ka + 20 >> 2] = M;
+                    if (0 == (M | 0)) {
+                      la = S;
+                      break b;
+                    }
+                  } while (0);
+                  M >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                  B[d + 6] = ka;
+                  var fa = C[f + 4];
+                  0 != (fa | 0) && (fa >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[d + 4] = fa, B[fa + 24 >> 2] = M);
+                  var Ca = C[f + 5];
+                  0 != (Ca | 0) && (Ca >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[d + 5] = Ca, B[Ca + 24 >> 2] = M);
+                  la = S;
+                }
+              } while (0);
+              var aa = 16 > R >>> 0;
+              b : do {
+                if (aa) {
+                  var kb = R + b | 0;
+                  B[la + 4 >> 2] = kb | 3;
+                  var Da = kb + (Ta + 4) | 0;
+                  B[Da >> 2] |= 1;
+                } else {
+                  if (B[la + 4 >> 2] = b | 3, B[h + (c + 1)] = R | 1, B[(R >> 2) + c + h] = R, 256 > R >>> 0) {
+                    var Wa = R >>> 2 & 1073741822, Ab = (Wa << 2) + V + 40 | 0, lb = C[V >> 2], Bb = 1 << (R >>> 3);
+                    if (0 == (lb & Bb | 0)) {
+                      B[V >> 2] = lb | Bb;
+                      var Ja = Ab, mb = (Wa + 2 << 2) + V + 40 | 0;
+                    } else {
+                      var ta = (Wa + 2 << 2) + V + 40 | 0, bb = C[ta >> 2];
+                      bb >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                      Ja = bb;
+                      mb = ta;
+                    }
+                    B[mb >> 2] = za;
+                    B[Ja + 12 >> 2] = za;
+                    B[h + (c + 2)] = Ja;
+                    B[h + (c + 3)] = Ab;
+                  } else {
+                    var ia = ub, Cb = R >>> 8;
+                    if (0 == (Cb | 0)) {
+                      var ma = 0;
+                    } else {
+                      if (16777215 < R >>> 0) {
+                        ma = 31;
+                      } else {
+                        var Jb = (Cb + 1048320 | 0) >>> 16 & 8, Db = Cb << Jb, cb = (Db + 520192 | 0) >>> 16 & 4, cc = Db << cb, nc = (cc + 245760 | 0) >>> 16 & 2, oc = 14 - (cb | Jb | nc) + (cc << nc >>> 15) | 0, ma = R >>> ((oc + 7 | 0) >>> 0) & 1 | oc << 1;
+                      }
+                    }
+                    var Wb = (ma << 2) + V + 304 | 0;
+                    B[h + (c + 7)] = ma;
+                    var Eb = b + (Ta + 16) | 0;
+                    B[h + (c + 5)] = 0;
+                    B[Eb >> 2] = 0;
+                    var pc = B[V + 4 >> 2], Xb = 1 << ma;
+                    if (0 == (pc & Xb | 0)) {
+                      B[V + 4 >> 2] = pc | Xb, B[Wb >> 2] = ia, B[h + (c + 6)] = Wb, B[h + (c + 3)] = ia, B[h + (c + 2)] = ia;
+                    } else {
+                      for (var Ob = R << (31 == (ma | 0) ? 0 : 25 - (ma >>> 1) | 0), nb = B[Wb >> 2]; ; ) {
+                        if ((B[nb + 4 >> 2] & -8 | 0) == (R | 0)) {
+                          var Yb = nb + 8 | 0, Kb = C[Yb >> 2], dc = C[V + 16 >> 2], Zb = nb >>> 0 < dc >>> 0;
+                          do {
+                            if (!Zb && Kb >>> 0 >= dc >>> 0) {
+                              B[Kb + 12 >> 2] = ia;
+                              B[Yb >> 2] = ia;
+                              B[h + (c + 2)] = Kb;
+                              B[h + (c + 3)] = nb;
+                              B[h + (c + 6)] = 0;
+                              break b;
+                            }
+                          } while (0);
+                          W();
+                          a("Reached an unreachable!");
+                        }
+                        var $b = (Ob >>> 31 << 2) + nb + 16 | 0, qc = C[$b >> 2];
+                        if (0 != (qc | 0)) {
+                          Ob <<= 1, nb = qc;
+                        } else {
+                          if ($b >>> 0 >= C[V + 16 >> 2] >>> 0) {
+                            B[$b >> 2] = ia;
+                            B[h + (c + 6)] = nb;
+                            B[h + (c + 3)] = ia;
+                            B[h + (c + 2)] = ia;
+                            break b;
+                          }
+                          W();
+                          a("Reached an unreachable!");
+                        }
+                      }
+                    }
+                  }
+                }
+              } while (0);
+              gb = la + 8 | 0;
+              break a;
+            }
+          }
+        } while (0);
+        W();
+        a("Reached an unreachable!");
+      }
+      gb = 0;
+    }
+  } while (0);
+  return gb;
+}
+
+xf.X = 1;
+
+function Hf() {
+  var b;
+  0 == (B[zf >> 2] | 0) && Af();
+  var d = C[V + 24 >> 2], c = 0 == (d | 0);
+  a : do {
+    if (!c) {
+      var e = C[V + 12 >> 2], f = 40 < e >>> 0;
+      do {
+        if (f) {
+          var i = C[zf + 8 >> 2], h = (Math.floor(((e - 41 + i | 0) >>> 0) / (i >>> 0)) - 1) * i | 0, j = Bf(d);
+          if (0 == (B[j + 12 >> 2] & 8 | 0)) {
+            var k = Cf(0);
+            b = (j + 4 | 0) >> 2;
+            if ((k | 0) == (B[j >> 2] + B[b] | 0) && (h = Cf(-(2147483646 < h >>> 0 ? -2147483648 - i | 0 : h) | 0), i = Cf(0), -1 != (h | 0) & i >>> 0 < k >>> 0 && (h = k - i | 0, (k | 0) != (i | 0)))) {
+              B[b] = B[b] - h | 0;
+              B[V + 432 >> 2] = B[V + 432 >> 2] - h | 0;
+              Df(B[V + 24 >> 2], B[V + 12 >> 2] - h | 0);
+              break a;
+            }
+          }
+        }
+      } while (0);
+      C[V + 12 >> 2] >>> 0 > C[V + 28 >> 2] >>> 0 && (B[V + 28 >> 2] = -1);
+    }
+  } while (0);
+}
+
+Hf.X = 1;
+
+function P(b) {
+  var d, c, e, f, i, h, j = b >> 2, k, o = 0 == (b | 0);
+  a : do {
+    if (!o) {
+      var s = b - 8 | 0, p = s, w = C[V + 16 >> 2], u = s >>> 0 < w >>> 0;
+      b : do {
+        if (!u) {
+          var x = C[b - 4 >> 2], v = x & 3;
+          if (1 != (v | 0)) {
+            var t = x & -8;
+            h = t >> 2;
+            var y = b + (t - 8) | 0, q = y, z = 0 == (x & 1 | 0);
+            c : do {
+              if (z) {
+                var I = C[s >> 2];
+                if (0 == (v | 0)) {
+                  break a;
+                }
+                var T = -8 - I | 0;
+                i = T >> 2;
+                var X = b + T | 0, K = X, N = I + t | 0;
+                if (X >>> 0 < w >>> 0) {
+                  break b;
+                }
+                if ((K | 0) == (B[V + 20 >> 2] | 0)) {
+                  f = (b + (t - 4) | 0) >> 2;
+                  if (3 != (B[f] & 3 | 0)) {
+                    var H = K;
+                    e = H >> 2;
+                    var U = N;
+                    break;
+                  }
+                  B[V + 8 >> 2] = N;
+                  B[f] &= -2;
+                  B[i + (j + 1)] = N | 1;
+                  B[y >> 2] = N;
+                  break a;
+                }
+                if (256 > I >>> 0) {
+                  var Za = C[i + (j + 2)], ua = C[i + (j + 3)];
+                  if ((Za | 0) == (ua | 0)) {
+                    B[V >> 2] &= 1 << (I >>> 3) ^ -1, H = K, e = H >> 2, U = N;
+                  } else {
+                    var Oa = ((I >>> 2 & 1073741822) << 2) + V + 40 | 0, da = (Za | 0) != (Oa | 0) & Za >>> 0 < w >>> 0;
+                    do {
+                      if (!da && (ua | 0) == (Oa | 0) | ua >>> 0 >= w >>> 0) {
+                        B[Za + 12 >> 2] = ua;
+                        B[ua + 8 >> 2] = Za;
+                        H = K;
+                        e = H >> 2;
+                        U = N;
+                        break c;
+                      }
+                    } while (0);
+                    W();
+                    a("Reached an unreachable!");
+                  }
+                } else {
+                  var va = X, Pa = C[i + (j + 6)], Y = C[i + (j + 3)], ob = (Y | 0) == (va | 0);
+                  do {
+                    if (ob) {
+                      var oa = T + (b + 20) | 0, pb = B[oa >> 2];
+                      if (0 == (pb | 0)) {
+                        var gb = T + (b + 16) | 0, hb = B[gb >> 2];
+                        if (0 == (hb | 0)) {
+                          var Z = 0;
+                          c = Z >> 2;
+                          break;
+                        }
+                        var Ha = gb, ha = hb;
+                      } else {
+                        Ha = oa, ha = pb, k = 22;
+                      }
+                      for (;;) {
+                        var $a = ha + 20 | 0, ib = B[$a >> 2];
+                        if (0 != (ib | 0)) {
+                          Ha = $a, ha = ib;
+                        } else {
+                          var pa = ha + 16 | 0, wa = C[pa >> 2];
+                          if (0 == (wa | 0)) {
+                            break;
+                          }
+                          Ha = pa;
+                          ha = wa;
+                        }
+                      }
+                      Ha >>> 0 < w >>> 0 && (W(), a("Reached an unreachable!"));
+                      B[Ha >> 2] = 0;
+                      Z = ha;
+                    } else {
+                      var Qa = C[i + (j + 2)];
+                      Qa >>> 0 < w >>> 0 && (W(), a("Reached an unreachable!"));
+                      B[Qa + 12 >> 2] = Y;
+                      B[Y + 8 >> 2] = Qa;
+                      Z = Y;
+                    }
+                    c = Z >> 2;
+                  } while (0);
+                  if (0 != (Pa | 0)) {
+                    var Hb = T + (b + 28) | 0, xa = (B[Hb >> 2] << 2) + V + 304 | 0, Lb = (va | 0) == (B[xa >> 2] | 0);
+                    do {
+                      if (Lb) {
+                        B[xa >> 2] = Z;
+                        if (0 != (Z | 0)) {
+                          break;
+                        }
+                        B[V + 4 >> 2] &= 1 << B[Hb >> 2] ^ -1;
+                        H = K;
+                        e = H >> 2;
+                        U = N;
+                        break c;
+                      }
+                      Pa >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                      var R = Pa + 16 | 0;
+                      (B[R >> 2] | 0) == (va | 0) ? B[R >> 2] = Z : B[Pa + 20 >> 2] = Z;
+                      if (0 == (Z | 0)) {
+                        H = K;
+                        e = H >> 2;
+                        U = N;
+                        break c;
+                      }
+                    } while (0);
+                    Z >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                    B[c + 6] = Pa;
+                    var S = C[i + (j + 4)];
+                    0 != (S | 0) && (S >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[c + 4] = S, B[S + 24 >> 2] = Z);
+                    var ya = C[i + (j + 5)];
+                    0 != (ya | 0) && (ya >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[c + 5] = ya, B[ya + 24 >> 2] = Z);
+                  }
+                  H = K;
+                  e = H >> 2;
+                  U = N;
+                }
+              } else {
+                H = p, e = H >> 2, U = t;
+              }
+            } while (0);
+            var Ra = H;
+            if (Ra >>> 0 < y >>> 0) {
+              var qb = b + (t - 4) | 0, ba = C[qb >> 2];
+              if (0 != (ba & 1 | 0)) {
+                var rb = 0 == (ba & 2 | 0);
+                do {
+                  if (rb) {
+                    if ((q | 0) == (B[V + 24 >> 2] | 0)) {
+                      var sb = B[V + 12 >> 2] + U | 0;
+                      B[V + 12 >> 2] = sb;
+                      B[V + 24 >> 2] = H;
+                      B[e + 1] = sb | 1;
+                      (H | 0) == (B[V + 20 >> 2] | 0) && (B[V + 20 >> 2] = 0, B[V + 8 >> 2] = 0);
+                      if (sb >>> 0 <= C[V + 28 >> 2] >>> 0) {
+                        break a;
+                      }
+                      Hf();
+                      break a;
+                    }
+                    if ((q | 0) == (B[V + 20 >> 2] | 0)) {
+                      var qa = B[V + 8 >> 2] + U | 0;
+                      B[V + 8 >> 2] = qa;
+                      B[V + 20 >> 2] = H;
+                      B[e + 1] = qa | 1;
+                      B[(Ra + qa | 0) >> 2] = qa;
+                      break a;
+                    }
+                    var Sa = (ba & -8) + U | 0, tb = ba >>> 3, Ta = 256 > ba >>> 0;
+                    c : do {
+                      if (Ta) {
+                        var ea = C[j + h], Ia = C[((t | 4) >> 2) + j];
+                        if ((ea | 0) == (Ia | 0)) {
+                          B[V >> 2] &= 1 << tb ^ -1;
+                        } else {
+                          var ub = ((ba >>> 2 & 1073741822) << 2) + V + 40 | 0;
+                          k = (ea | 0) == (ub | 0) ? 64 : ea >>> 0 < C[V + 16 >> 2] >>> 0 ? 67 : 64;
+                          do {
+                            if (64 == k && !((Ia | 0) != (ub | 0) && Ia >>> 0 < C[V + 16 >> 2] >>> 0)) {
+                              B[ea + 12 >> 2] = Ia;
+                              B[Ia + 8 >> 2] = ea;
+                              break c;
+                            }
+                          } while (0);
+                          W();
+                          a("Reached an unreachable!");
+                        }
+                      } else {
+                        var za = y, ka = C[h + (j + 4)], Aa = C[((t | 4) >> 2) + j], Vb = (Aa | 0) == (za | 0);
+                        do {
+                          if (Vb) {
+                            var vb = t + (b + 12) | 0, wb = B[vb >> 2];
+                            if (0 == (wb | 0)) {
+                              var xb = t + (b + 8) | 0, Ba = B[xb >> 2];
+                              if (0 == (Ba | 0)) {
+                                var M = 0;
+                                d = M >> 2;
+                                break;
+                              }
+                              var ra = xb, $ = Ba;
+                            } else {
+                              ra = vb, $ = wb, k = 74;
+                            }
+                            for (;;) {
+                              var Ua = $ + 20 | 0, Ib = B[Ua >> 2];
+                              if (0 != (Ib | 0)) {
+                                ra = Ua, $ = Ib;
+                              } else {
+                                var ab = $ + 16 | 0, yb = C[ab >> 2];
+                                if (0 == (yb | 0)) {
+                                  break;
+                                }
+                                ra = ab;
+                                $ = yb;
+                              }
+                            }
+                            ra >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                            B[ra >> 2] = 0;
+                            M = $;
+                          } else {
+                            var Va = C[j + h];
+                            Va >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                            B[Va + 12 >> 2] = Aa;
+                            B[Aa + 8 >> 2] = Va;
+                            M = Aa;
+                          }
+                          d = M >> 2;
+                        } while (0);
+                        if (0 != (ka | 0)) {
+                          var Mb = t + (b + 20) | 0, la = (B[Mb >> 2] << 2) + V + 304 | 0, Nb = (za | 0) == (B[la >> 2] | 0);
+                          do {
+                            if (Nb) {
+                              B[la >> 2] = M;
+                              if (0 != (M | 0)) {
+                                break;
+                              }
+                              B[V + 4 >> 2] &= 1 << B[Mb >> 2] ^ -1;
+                              break c;
+                            }
+                            ka >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                            var jb = ka + 16 | 0;
+                            (B[jb >> 2] | 0) == (za | 0) ? B[jb >> 2] = M : B[ka + 20 >> 2] = M;
+                            if (0 == (M | 0)) {
+                              break c;
+                            }
+                          } while (0);
+                          M >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                          B[d + 6] = ka;
+                          var zb = C[h + (j + 2)];
+                          0 != (zb | 0) && (zb >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[d + 4] = zb, B[zb + 24 >> 2] = M);
+                          var sa = C[h + (j + 3)];
+                          0 != (sa | 0) && (sa >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[d + 5] = sa, B[sa + 24 >> 2] = M);
+                        }
+                      }
+                    } while (0);
+                    B[e + 1] = Sa | 1;
+                    B[Ra + Sa >> 2] = Sa;
+                    if ((H | 0) != (B[V + 20 >> 2] | 0)) {
+                      var fa = Sa;
+                    } else {
+                      B[V + 8 >> 2] = Sa;
+                      break a;
+                    }
+                  } else {
+                    B[qb >> 2] = ba & -2, B[e + 1] = U | 1, fa = B[Ra + U >> 2] = U;
+                  }
+                } while (0);
+                if (256 > fa >>> 0) {
+                  var Ca = fa >>> 2 & 1073741822, aa = (Ca << 2) + V + 40 | 0, kb = C[V >> 2], Da = 1 << (fa >>> 3);
+                  if (0 == (kb & Da | 0)) {
+                    B[V >> 2] = kb | Da;
+                    var Wa = aa, Ab = (Ca + 2 << 2) + V + 40 | 0;
+                  } else {
+                    var lb = (Ca + 2 << 2) + V + 40 | 0, Bb = C[lb >> 2];
+                    Bb >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                    Wa = Bb;
+                    Ab = lb;
+                  }
+                  B[Ab >> 2] = H;
+                  B[Wa + 12 >> 2] = H;
+                  B[e + 2] = Wa;
+                  B[e + 3] = aa;
+                  break a;
+                }
+                var Ja = H, mb = fa >>> 8;
+                if (0 == (mb | 0)) {
+                  var ta = 0;
+                } else {
+                  if (16777215 < fa >>> 0) {
+                    ta = 31;
+                  } else {
+                    var bb = (mb + 1048320 | 0) >>> 16 & 8, ia = mb << bb, Cb = (ia + 520192 | 0) >>> 16 & 4, ma = ia << Cb, Jb = (ma + 245760 | 0) >>> 16 & 2, Db = 14 - (Cb | bb | Jb) + (ma << Jb >>> 15) | 0, ta = fa >>> ((Db + 7 | 0) >>> 0) & 1 | Db << 1;
+                  }
+                }
+                var cb = (ta << 2) + V + 304 | 0;
+                B[e + 7] = ta;
+                B[e + 5] = 0;
+                B[e + 4] = 0;
+                var cc = B[V + 4 >> 2], nc = 1 << ta, oc = 0 == (cc & nc | 0);
+                c : do {
+                  if (oc) {
+                    B[V + 4 >> 2] = cc | nc, B[cb >> 2] = Ja, B[e + 6] = cb, B[e + 3] = H, B[e + 2] = H;
+                  } else {
+                    for (var Wb = fa << (31 == (ta | 0) ? 0 : 25 - (ta >>> 1) | 0), Eb = B[cb >> 2]; ; ) {
+                      if ((B[Eb + 4 >> 2] & -8 | 0) == (fa | 0)) {
+                        var pc = Eb + 8 | 0, Xb = C[pc >> 2], Ob = C[V + 16 >> 2], nb = Eb >>> 0 < Ob >>> 0;
+                        do {
+                          if (!nb && Xb >>> 0 >= Ob >>> 0) {
+                            B[Xb + 12 >> 2] = Ja;
+                            B[pc >> 2] = Ja;
+                            B[e + 2] = Xb;
+                            B[e + 3] = Eb;
+                            B[e + 6] = 0;
+                            break c;
+                          }
+                        } while (0);
+                        W();
+                        a("Reached an unreachable!");
+                      }
+                      var Yb = (Wb >>> 31 << 2) + Eb + 16 | 0, Kb = C[Yb >> 2];
+                      if (0 != (Kb | 0)) {
+                        Wb <<= 1, Eb = Kb;
+                      } else {
+                        if (Yb >>> 0 >= C[V + 16 >> 2] >>> 0) {
+                          B[Yb >> 2] = Ja;
+                          B[e + 6] = Eb;
+                          B[e + 3] = H;
+                          B[e + 2] = H;
+                          break c;
+                        }
+                        W();
+                        a("Reached an unreachable!");
+                      }
+                    }
+                  }
+                } while (0);
+                var dc = B[V + 32 >> 2] - 1 | 0;
+                B[V + 32 >> 2] = dc;
+                if (0 != (dc | 0)) {
+                  break a;
+                }
+                for (var Zb = V + 452 | 0; ; ) {
+                  var $b = B[Zb >> 2];
+                  if (0 == ($b | 0)) {
+                    break;
+                  }
+                  Zb = $b + 8 | 0;
+                }
+                B[V + 32 >> 2] = -1;
+                break a;
+              }
+            }
+          }
+        }
+      } while (0);
+      W();
+      a("Reached an unreachable!");
+    }
+  } while (0);
+}
+
+Module._free = P;
+
+P.X = 1;
+
+function Bf(b) {
+  var d, c = V + 444 | 0;
+  for (d = c >> 2; ; ) {
+    var e = C[d];
+    if (e >>> 0 <= b >>> 0 && (e + B[d + 1] | 0) >>> 0 > b >>> 0) {
+      var f = c;
+      break;
+    }
+    d = C[d + 2];
+    if (0 == (d | 0)) {
+      f = 0;
+      break;
+    }
+    c = d;
+    d = c >> 2;
+  }
+  return f;
+}
+
+function Df(b, d) {
+  var c = b + 8 | 0, c = 0 == (c & 7 | 0) ? 0 : -c & 7, e = d - c | 0;
+  B[V + 24 >> 2] = b + c | 0;
+  B[V + 12 >> 2] = e;
+  B[c + (b + 4) >> 2] = e | 1;
+  B[d + (b + 4) >> 2] = 40;
+  B[V + 28 >> 2] = B[zf + 16 >> 2];
+}
+
+function ad(b, d) {
+  return 0 == (b | 0) ? J(d) : If(b, d);
+}
+
+function If(b, d) {
+  var c, e, f, i = 4294967231 < d >>> 0;
+  a : do {
+    if (i) {
+      B[Gf >> 2] = 12;
+      var h = 0;
+    } else {
+      f = c = b - 8 | 0;
+      e = (b - 4 | 0) >> 2;
+      var j = C[e], k = j & -8, o = k - 8 | 0, s = b + o | 0, p = c >>> 0 < C[V + 16 >> 2] >>> 0;
+      do {
+        if (!p) {
+          var w = j & 3;
+          if (1 != (w | 0) & -8 < (o | 0) && (c = (b + (k - 4) | 0) >> 2, 0 != (B[c] & 1 | 0))) {
+            i = 11 > d >>> 0 ? 16 : d + 11 & -8;
+            if (0 == (w | 0)) {
+              var u = 0, x, j = B[f + 4 >> 2] & -8;
+              x = 256 > i >>> 0 ? 0 : j >>> 0 >= (i + 4 | 0) >>> 0 && (j - i | 0) >>> 0 <= B[zf + 8 >> 2] << 1 >>> 0 ? f : 0;
+              f = 18;
+            } else {
+              k >>> 0 < i >>> 0 ? (s | 0) != (B[V + 24 >> 2] | 0) ? f = 22 : (c = B[V + 12 >> 2] + k | 0, c >>> 0 > i >>> 0 ? (u = c - i | 0, x = b + (i - 8) | 0, B[e] = i | j & 1 | 2, B[b + (i - 4) >> 2] = u | 1, B[V + 24 >> 2] = x, B[V + 12 >> 2] = u, u = 0, x = f, f = 18) : f = 22) : (u = k - i | 0, 15 < u >>> 0 ? (B[e] = i | j & 1 | 2, B[b + (i - 4) >> 2] = u | 3, B[c] |= 1, u = b + i | 0) : u = 0, x = f, f = 18);
+            }
+            do {
+              if (18 == f && 0 != (x | 0)) {
+                0 != (u | 0) && P(u);
+                h = x + 8 | 0;
+                break a;
+              }
+            } while (0);
+            f = J(d);
+            if (0 == (f | 0)) {
+              h = 0;
+              break a;
+            }
+            e = k - (0 == (B[e] & 3 | 0) ? 8 : 4) | 0;
+            ne(f, b, e >>> 0 < d >>> 0 ? e : d);
+            P(b);
+            h = f;
+            break a;
+          }
+        }
+      } while (0);
+      W();
+      a("Reached an unreachable!");
+    }
+  } while (0);
+  return h;
+}
+
+If.X = 1;
+
+function Af() {
+  if (0 == (B[zf >> 2] | 0)) {
+    var b = Jf();
+    0 == (b - 1 & b | 0) ? (B[zf + 8 >> 2] = b, B[zf + 4 >> 2] = b, B[zf + 12 >> 2] = -1, B[zf + 16 >> 2] = 2097152, B[zf + 20 >> 2] = 0, B[V + 440 >> 2] = 0, B[zf >> 2] = Math.floor(Date.now() / 1e3) & -16 ^ 1431655768) : (W(), a("Reached an unreachable!"));
+  }
+}
+
+function Ef(b, d, c) {
+  var e, f, i, h = d >> 2, j = b >> 2, k, o = b + 8 | 0, o = 0 == (o & 7 | 0) ? 0 : -o & 7;
+  f = d + 8 | 0;
+  var s = 0 == (f & 7 | 0) ? 0 : -f & 7;
+  i = s >> 2;
+  var p = d + s | 0, w = o + c | 0;
+  f = w >> 2;
+  var u = b + w | 0, x = p - (b + o) - c | 0;
+  B[(o + 4 >> 2) + j] = c | 3;
+  c = (p | 0) == (B[V + 24 >> 2] | 0);
+  a : do {
+    if (c) {
+      var v = B[V + 12 >> 2] + x | 0;
+      B[V + 12 >> 2] = v;
+      B[V + 24 >> 2] = u;
+      B[f + (j + 1)] = v | 1;
+    } else {
+      if ((p | 0) == (B[V + 20 >> 2] | 0)) {
+        v = B[V + 8 >> 2] + x | 0, B[V + 8 >> 2] = v, B[V + 20 >> 2] = u, B[f + (j + 1)] = v | 1, B[(b + v + w | 0) >> 2] = v;
+      } else {
+        var t = C[i + (h + 1)];
+        if (1 == (t & 3 | 0)) {
+          var v = t & -8, y = t >>> 3, q = 256 > t >>> 0;
+          b : do {
+            if (q) {
+              var z = C[((s | 8) >> 2) + h], I = C[i + (h + 3)];
+              if ((z | 0) == (I | 0)) {
+                B[V >> 2] &= 1 << y ^ -1;
+              } else {
+                var T = ((t >>> 2 & 1073741822) << 2) + V + 40 | 0;
+                k = (z | 0) == (T | 0) ? 16 : z >>> 0 < C[V + 16 >> 2] >>> 0 ? 19 : 16;
+                do {
+                  if (16 == k && !((I | 0) != (T | 0) && I >>> 0 < C[V + 16 >> 2] >>> 0)) {
+                    B[z + 12 >> 2] = I;
+                    B[I + 8 >> 2] = z;
+                    break b;
+                  }
+                } while (0);
+                W();
+                a("Reached an unreachable!");
+              }
+            } else {
+              k = p;
+              z = C[((s | 24) >> 2) + h];
+              I = C[i + (h + 3)];
+              T = (I | 0) == (k | 0);
+              do {
+                if (T) {
+                  e = s | 16;
+                  var X = e + (d + 4) | 0, K = B[X >> 2];
+                  if (0 == (K | 0)) {
+                    if (e = d + e | 0, K = B[e >> 2], 0 == (K | 0)) {
+                      K = 0;
+                      e = K >> 2;
+                      break;
+                    }
+                  } else {
+                    e = X;
+                  }
+                  for (;;) {
+                    var X = K + 20 | 0, N = B[X >> 2];
+                    if (0 == (N | 0) && (X = K + 16 | 0, N = C[X >> 2], 0 == (N | 0))) {
+                      break;
+                    }
+                    e = X;
+                    K = N;
+                  }
+                  e >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                  B[e >> 2] = 0;
+                } else {
+                  e = C[((s | 8) >> 2) + h], e >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[e + 12 >> 2] = I, B[I + 8 >> 2] = e, K = I;
+                }
+                e = K >> 2;
+              } while (0);
+              if (0 != (z | 0)) {
+                I = s + (d + 28) | 0;
+                T = (B[I >> 2] << 2) + V + 304 | 0;
+                X = (k | 0) == (B[T >> 2] | 0);
+                do {
+                  if (X) {
+                    B[T >> 2] = K;
+                    if (0 != (K | 0)) {
+                      break;
+                    }
+                    B[V + 4 >> 2] &= 1 << B[I >> 2] ^ -1;
+                    break b;
+                  }
+                  z >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                  N = z + 16 | 0;
+                  (B[N >> 2] | 0) == (k | 0) ? B[N >> 2] = K : B[z + 20 >> 2] = K;
+                  if (0 == (K | 0)) {
+                    break b;
+                  }
+                } while (0);
+                K >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"));
+                B[e + 6] = z;
+                k = s | 16;
+                z = C[(k >> 2) + h];
+                0 != (z | 0) && (z >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[e + 4] = z, B[z + 24 >> 2] = K);
+                k = C[(k + 4 >> 2) + h];
+                0 != (k | 0) && (k >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!")), B[e + 5] = k, B[k + 24 >> 2] = K);
+              }
+            }
+          } while (0);
+          t = d + (v | s) | 0;
+          v = v + x | 0;
+        } else {
+          t = p, v = x;
+        }
+        t = t + 4 | 0;
+        B[t >> 2] &= -2;
+        B[f + (j + 1)] = v | 1;
+        B[(v >> 2) + j + f] = v;
+        if (256 > v >>> 0) {
+          y = v >>> 2 & 1073741822, t = (y << 2) + V + 40 | 0, q = C[V >> 2], v = 1 << (v >>> 3), 0 == (q & v | 0) ? (B[V >> 2] = q | v, v = t, y = (y + 2 << 2) + V + 40 | 0) : (y = (y + 2 << 2) + V + 40 | 0, v = C[y >> 2], v >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"))), B[y >> 2] = u, B[v + 12 >> 2] = u, B[f + (j + 2)] = v, B[f + (j + 3)] = t;
+        } else {
+          if (t = u, q = v >>> 8, 0 == (q | 0) ? y = 0 : 16777215 < v >>> 0 ? y = 31 : (y = (q + 1048320 | 0) >>> 16 & 8, k = q << y, q = (k + 520192 | 0) >>> 16 & 4, k <<= q, z = (k + 245760 | 0) >>> 16 & 2, y = 14 - (q | y | z) + (k << z >>> 15) | 0, y = v >>> ((y + 7 | 0) >>> 0) & 1 | y << 1), q = (y << 2) + V + 304 | 0, B[f + (j + 7)] = y, k = w + (b + 16) | 0, B[f + (j + 5)] = 0, B[k >> 2] = 0, k = B[V + 4 >> 2], z = 1 << y, 0 == (k & z | 0)) {
+            B[V + 4 >> 2] = k | z, B[q >> 2] = t, B[f + (j + 6)] = q, B[f + (j + 3)] = t, B[f + (j + 2)] = t;
+          } else {
+            y = v << (31 == (y | 0) ? 0 : 25 - (y >>> 1) | 0);
+            for (q = B[q >> 2]; ; ) {
+              if ((B[q + 4 >> 2] & -8 | 0) == (v | 0)) {
+                k = q + 8 | 0;
+                z = C[k >> 2];
+                I = C[V + 16 >> 2];
+                T = q >>> 0 < I >>> 0;
+                do {
+                  if (!T && z >>> 0 >= I >>> 0) {
+                    B[z + 12 >> 2] = t;
+                    B[k >> 2] = t;
+                    B[f + (j + 2)] = z;
+                    B[f + (j + 3)] = q;
+                    B[f + (j + 6)] = 0;
+                    break a;
+                  }
+                } while (0);
+                W();
+                a("Reached an unreachable!");
+              }
+              k = (y >>> 31 << 2) + q + 16 | 0;
+              z = C[k >> 2];
+              if (0 != (z | 0)) {
+                y <<= 1, q = z;
+              } else {
+                if (k >>> 0 >= C[V + 16 >> 2] >>> 0) {
+                  B[k >> 2] = t;
+                  B[f + (j + 6)] = q;
+                  B[f + (j + 3)] = t;
+                  B[f + (j + 2)] = t;
+                  break a;
+                }
+                W();
+                a("Reached an unreachable!");
+              }
+            }
+          }
+        }
+      }
+    }
+  } while (0);
+  return b + (o | 8) | 0;
+}
+
+Ef.X = 1;
+
+function Ff(b, d) {
+  var c, e, f = C[V + 24 >> 2];
+  e = f >> 2;
+  var i = Bf(f), h = B[i >> 2];
+  c = B[i + 4 >> 2];
+  var i = h + c | 0, j = h + (c - 39) | 0, h = h + (c - 47) + (0 == (j & 7 | 0) ? 0 : -j & 7) | 0, h = h >>> 0 < (f + 16 | 0) >>> 0 ? f : h, j = h + 8 | 0;
+  c = j >> 2;
+  Df(b, d - 40 | 0);
+  B[(h + 4 | 0) >> 2] = 27;
+  B[c] = B[V + 444 >> 2];
+  B[c + 1] = B[V + 448 >> 2];
+  B[c + 2] = B[V + 452 >> 2];
+  B[c + 3] = B[V + 456 >> 2];
+  B[V + 444 >> 2] = b;
+  B[V + 448 >> 2] = d;
+  B[V + 456 >> 2] = 0;
+  B[V + 452 >> 2] = j;
+  c = h + 28 | 0;
+  B[c >> 2] = 7;
+  j = (h + 32 | 0) >>> 0 < i >>> 0;
+  a : do {
+    if (j) {
+      for (var k = c; ; ) {
+        var o = k + 4 | 0;
+        B[o >> 2] = 7;
+        if ((k + 8 | 0) >>> 0 >= i >>> 0) {
+          break a;
+        }
+        k = o;
+      }
+    }
+  } while (0);
+  i = (h | 0) == (f | 0);
+  a : do {
+    if (!i) {
+      if (c = h - f | 0, j = f + c | 0, k = c + (f + 4) | 0, B[k >> 2] &= -2, B[e + 1] = c | 1, B[j >> 2] = c, 256 > c >>> 0) {
+        k = c >>> 2 & 1073741822, j = (k << 2) + V + 40 | 0, o = C[V >> 2], c = 1 << (c >>> 3), 0 == (o & c | 0) ? (B[V >> 2] = o | c, c = j, k = (k + 2 << 2) + V + 40 | 0) : (k = (k + 2 << 2) + V + 40 | 0, c = C[k >> 2], c >>> 0 < C[V + 16 >> 2] >>> 0 && (W(), a("Reached an unreachable!"))), B[k >> 2] = f, B[c + 12 >> 2] = f, B[e + 2] = c, B[e + 3] = j;
+      } else {
+        j = f;
+        o = c >>> 8;
+        if (0 == (o | 0)) {
+          k = 0;
+        } else {
+          if (16777215 < c >>> 0) {
+            k = 31;
+          } else {
+            var k = (o + 1048320 | 0) >>> 16 & 8, s = o << k, o = (s + 520192 | 0) >>> 16 & 4, s = s << o, p = (s + 245760 | 0) >>> 16 & 2, k = 14 - (o | k | p) + (s << p >>> 15) | 0, k = c >>> ((k + 7 | 0) >>> 0) & 1 | k << 1;
+          }
+        }
+        o = (k << 2) + V + 304 | 0;
+        B[e + 7] = k;
+        B[e + 5] = 0;
+        B[e + 4] = 0;
+        s = B[V + 4 >> 2];
+        p = 1 << k;
+        if (0 == (s & p | 0)) {
+          B[V + 4 >> 2] = s | p, B[o >> 2] = j, B[e + 6] = o, B[e + 3] = f, B[e + 2] = f;
+        } else {
+          k = c << (31 == (k | 0) ? 0 : 25 - (k >>> 1) | 0);
+          for (o = B[o >> 2]; ; ) {
+            if ((B[o + 4 >> 2] & -8 | 0) == (c | 0)) {
+              var s = o + 8 | 0, p = C[s >> 2], w = C[V + 16 >> 2], u = o >>> 0 < w >>> 0;
+              do {
+                if (!u && p >>> 0 >= w >>> 0) {
+                  B[p + 12 >> 2] = j;
+                  B[s >> 2] = j;
+                  B[e + 2] = p;
+                  B[e + 3] = o;
+                  B[e + 6] = 0;
+                  break a;
+                }
+              } while (0);
+              W();
+              a("Reached an unreachable!");
+            }
+            s = (k >>> 31 << 2) + o + 16 | 0;
+            p = C[s >> 2];
+            if (0 != (p | 0)) {
+              k <<= 1, o = p;
+            } else {
+              if (s >>> 0 >= C[V + 16 >> 2] >>> 0) {
+                B[s >> 2] = j;
+                B[e + 6] = o;
+                B[e + 3] = f;
+                B[e + 2] = f;
+                break a;
+              }
+              W();
+              a("Reached an unreachable!");
+            }
+          }
+        }
+      }
+    }
+  } while (0);
+}
+
+Ff.X = 1;
+
+var Kf = l, Lf = 13, Mf = 9, Nf = 22, Of = 5, Pf = 21, Qf = 6;
+
+function Rf(b) {
+  Gf || (Gf = G([ 0 ], "i32", F));
+  B[Gf >> 2] = b;
+}
+
+var Gf, Sf = 0, sf = 0, Tf = 0, Uf = 2, vf = [ l ], Vf = g;
+
+function Wf(b, d) {
+  if ("string" !== typeof b) {
+    return l;
+  }
+  d === ca && (d = "/");
+  b && "/" == b[0] && (d = "");
+  for (var c = (d + "/" + b).split("/").reverse(), e = [ "" ]; c.length; ) {
+    var f = c.pop();
+    "" == f || "." == f || (".." == f ? 1 < e.length && e.pop() : e.push(f));
+  }
+  return 1 == e.length ? "/" : e.join("/");
+}
+
+function Xf(b, d, c) {
+  var e = {
+    M: m,
+    m: m,
+    error: 0,
+    name: l,
+    path: l,
+    object: l,
+    t: m,
+    v: l,
+    u: l
+  }, b = Wf(b);
+  if ("/" == b) {
+    e.M = g, e.m = e.t = g, e.name = "/", e.path = e.v = "/", e.object = e.u = Yf;
+  } else {
+    if (b !== l) {
+      for (var c = c || 0, b = b.slice(1).split("/"), f = Yf, i = [ "" ]; b.length; ) {
+        1 == b.length && f.d && (e.t = g, e.v = 1 == i.length ? "/" : i.join("/"), e.u = f, e.name = b[0]);
+        var h = b.shift();
+        if (f.d) {
+          if (f.z) {
+            if (!f.a.hasOwnProperty(h)) {
+              e.error = 2;
+              break;
+            }
+          } else {
+            e.error = Lf;
+            break;
+          }
+        } else {
+          e.error = 20;
+          break;
+        }
+        f = f.a[h];
+        if (f.link && !(d && 0 == b.length)) {
+          if (40 < c) {
+            e.error = 40;
+            break;
+          }
+          e = Wf(f.link, i.join("/"));
+          e = Xf([ e ].concat(b).join("/"), d, c + 1);
+          break;
+        }
+        i.push(h);
+        0 == b.length && (e.m = g, e.path = i.join("/"), e.object = f);
+      }
+    }
+  }
+  return e;
+}
+
+function Zf(b) {
+  $f();
+  b = Xf(b, ca);
+  if (b.m) {
+    return b.object;
+  }
+  Rf(b.error);
+  return l;
+}
+
+function ag(b, d, c, e, f) {
+  b || (b = "/");
+  "string" === typeof b && (b = Zf(b));
+  b || (Rf(Lf), a(Error("Parent path must exist.")));
+  b.d || (Rf(20), a(Error("Parent must be a folder.")));
+  !b.write && !Vf && (Rf(Lf), a(Error("Parent folder must be writeable.")));
+  if (!d || "." == d || ".." == d) {
+    Rf(2), a(Error("Name must not be empty."));
+  }
+  b.a.hasOwnProperty(d) && (Rf(17), a(Error("Can't overwrite object.")));
+  b.a[d] = {
+    z: e === ca ? g : e,
+    write: f === ca ? m : f,
+    timestamp: Date.now(),
+    L: Uf++
+  };
+  for (var i in c) {
+    c.hasOwnProperty(i) && (b.a[d][i] = c[i]);
+  }
+  return b.a[d];
+}
+
+function bg(b, d, c, e) {
+  return ag(b, d, {
+    d: g,
+    c: m,
+    a: {}
+  }, c, e);
+}
+
+function fg(b, d, c, e) {
+  b = Zf(b);
+  b === l && a(Error("Invalid parent."));
+  for (d = d.split("/").reverse(); d.length; ) {
+    var f = d.pop();
+    f && (b.a.hasOwnProperty(f) || bg(b, f, c, e), b = b.a[f]);
+  }
+  return b;
+}
+
+function hg(b, d, c, e, f) {
+  c.d = m;
+  return ag(b, d, c, e, f);
+}
+
+function ug(b, d, c, e) {
+  !c && !e && a(Error("A device must have at least one callback defined."));
+  return hg(b, d, {
+    c: g,
+    input: c,
+    e: e
+  }, Boolean(c), Boolean(e));
+}
+
+function $f() {
+  Yf || (Yf = {
+    z: g,
+    write: g,
+    d: g,
+    c: m,
+    timestamp: Date.now(),
+    L: 1,
+    a: {}
+  });
+}
+
+function vg() {
+  var b, d, c;
+  function e(b) {
+    b === l || 10 === b ? (d.h(d.buffer.join("")), d.buffer = []) : d.buffer.push(j.w(b));
+  }
+  eb(!wg, "FS.init was previously called. If you want to initialize later with custom parameters, remove any earlier calls (note that one is automatically added to the generated code)");
+  wg = g;
+  $f();
+  b = b || Module.stdin;
+  d = d || Module.stdout;
+  c = c || Module.stderr;
+  var f = g, i = g, h = g;
+  b || (f = m, b = (function() {
+    if (!b.j || !b.j.length) {
+      var c;
+      "undefined" != typeof window && "function" == typeof window.prompt ? (c = window.prompt("Input: "), c === l && (c = String.fromCharCode(0))) : "function" == typeof readline && (c = readline());
+      c || (c = "");
+      b.j = Fc(c + "\n", g);
+    }
+    return b.j.shift();
+  }));
+  var j = new Qb;
+  d || (i = m, d = e);
+  d.h || (d.h = Module.print);
+  d.buffer || (d.buffer = []);
+  c || (h = m, c = e);
+  c.h || (c.h = Module.print);
+  c.buffer || (c.buffer = []);
+  try {
+    bg("/", "tmp", g, g);
+  } catch (k) {}
+  var o = bg("/", "dev", g, g), s = ug(o, "stdin", b), p = ug(o, "stdout", l, d);
+  c = ug(o, "stderr", l, c);
+  ug(o, "tty", b, d);
+  vf[1] = {
+    path: "/dev/stdin",
+    object: s,
+    position: 0,
+    r: g,
+    f: m,
+    p: m,
+    s: !f,
+    error: m,
+    o: m,
+    B: []
+  };
+  vf[2] = {
+    path: "/dev/stdout",
+    object: p,
+    position: 0,
+    r: m,
+    f: g,
+    p: m,
+    s: !i,
+    error: m,
+    o: m,
+    B: []
+  };
+  vf[3] = {
+    path: "/dev/stderr",
+    object: c,
+    position: 0,
+    r: m,
+    f: g,
+    p: m,
+    s: !h,
+    error: m,
+    o: m,
+    B: []
+  };
+  Sf = G([ 1 ], "void*", F);
+  sf = G([ 2 ], "void*", F);
+  Tf = G([ 3 ], "void*", F);
+  fg("/", "dev/shm/tmp", g, g);
+  vf[Sf] = vf[1];
+  vf[sf] = vf[2];
+  vf[Tf] = vf[3];
+  G([ G([ 0, 0, 0, 0, Sf, 0, 0, 0, sf, 0, 0, 0, Tf, 0, 0, 0 ], "void*", F) ], "void*", F);
+}
+
+var wg, Yf, xg = m, yg = [];
+
+function zg(b, d) {
+  try {
+    var c = b.getContext(d ? "experimental-webgl" : "2d");
+    c || a(":(");
+  } catch (e) {
+    return Module.print("Could not create canvas - " + e), l;
+  }
+  d && (b.style.backgroundColor = "black", b.addEventListener("webglcontextlost", (function() {
+    alert("WebGL context lost. You will need to reload the page.");
+  }), m));
+  Module.l = c;
+  Module.Z = d;
+  yg.forEach((function(b) {
+    b();
+  }));
+  return c;
+}
+
+function Ag() {
+  function b() {
+    if (Module.onFullScreen) {
+      Module.onFullScreen();
+    }
+    if (document.webkitFullScreenElement === c || document.mozFullScreenElement === c || document.fullScreenElement === c) {
+      c.Q = c.requestPointerLock || c.mozRequestPointerLock || c.webkitRequestPointerLock, c.Q();
+    }
+  }
+  function d() {}
+  var c = Module.canvas;
+  document.addEventListener("fullscreenchange", b, m);
+  document.addEventListener("mozfullscreenchange", b, m);
+  document.addEventListener("webkitfullscreenchange", b, m);
+  document.addEventListener("pointerlockchange", d, m);
+  document.addEventListener("mozpointerlockchange", d, m);
+  document.addEventListener("webkitpointerlockchange", d, m);
+  c.P = c.requestFullScreen || c.mozRequestFullScreen || (c.webkitRequestFullScreen ? (function() {
+    c.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+  }) : l);
+  c.P();
+}
+
+var me = g, ke = {}, Bg = [], oe = m, Cg = l, Dg = [ 0, 0, 0 ];
+
+function Eg() {
+  var b = 0, b = b || 0, d = J(14 * db), c = J(1228800), e = J(18 * db), b = b | 1, f = b & 2097152 ? 1 : 4;
+  B[d + 0 * db >> 2] = b;
+  B[d + 1 * db >> 2] = e;
+  B[d + 2 * db >> 2] = 640;
+  B[d + 3 * db >> 2] = 480;
+  B[d + 4 * db >> 2] = 640 * f;
+  B[d + 5 * db >> 2] = c;
+  B[d + 6 * db >> 2] = 0;
+  B[e + 0 >> 2] = -2042224636;
+  B[e + 4 >> 2] = 0;
+  r[e + 8] = 8 * f;
+  r[e + 9] = f;
+  B[e + 12 >> 2] = 255;
+  B[e + 16 >> 2] = 65280;
+  B[e + 20 >> 2] = 16711680;
+  B[e + 24 >> 2] = 4278190080;
+  var i = 0 != (b & 67108864);
+  oe = oe || i;
+  f = Module.canvas;
+  i = zg(f, i);
+  ke[d] = {
+    width: 640,
+    height: 480,
+    canvas: f,
+    l: i,
+    W: d,
+    buffer: c,
+    V: e,
+    alpha: 255,
+    S: b,
+    g: 0,
+    Y: g,
+    source: "screen",
+    q: (function(c) {
+      return b & c;
+    })
+  };
+  return d;
+}
+
+function Fg(b) {
+  switch (b.type) {
+   case "mousemove":
+    b.movementX = b.mozMovementX, b.movementY = b.mozMovementY;
+   case "keydown":
+   case "keyup":
+   case "mousedown":
+   case "mouseup":
+   case "DOMMouseScroll":
+    if ("DOMMouseScroll" == b.type) {
+      b = {
+        type: "mousedown",
+        button: 0 < b.detail ? 4 : 3,
+        pageX: b.pageX,
+        pageY: b.pageY
+      };
+    } else {
+      if ("mousedown" == b.type) {
+        Dg[b.button] = 1;
+      } else {
+        if ("mouseup" == b.type) {
+          if (!Dg[b.button]) {
+            break;
+          }
+          Dg[b.button] = 0;
+        }
+      }
+    }
+    Bg.push(b);
+    1e4 <= Bg.length && (Module.N("SDL event queue full, dropping earliest event"), Bg.shift());
+    (37 <= b.keyCode && 40 >= b.keyCode || 32 == b.keyCode || 33 == b.keyCode || 34 == b.keyCode) && b.preventDefault();
+    break;
+   case "mouseout":
+    for (var d = 0; 3 > d; d++) {
+      Dg[d] && (Bg.push({
+        type: "mouseup",
+        button: d,
+        pageX: b.pageX,
+        pageY: b.pageY
+      }), Dg[d] = 0);
+    }
+  }
+  return m;
+}
+
+var le;
+
+function Le() {
+  [ "keydown", "keyup" ].forEach((function(b) {
+    addEventListener(b, Fg, g);
+  }));
+  Cg = J(65536);
+  yc(Cg, 65536);
+}
+
+function Me() {
+  [ "mousedown", "mouseup", "mousemove", "DOMMouseScroll", "mouseout" ].forEach((function(b) {
+    Module.canvas.addEventListener(b, Fg, g);
+  }));
+  Module.canvas.width = 640;
+  Module.canvas.height = 480;
+  return le = Eg();
+}
+
+var ie;
+
+function tf(b, d, c) {
+  var e = vf[b];
+  if (e) {
+    if (e.f) {
+      if (0 > c) {
+        return Rf(Nf), -1;
+      }
+      if (e.object.c) {
+        if (e.object.e) {
+          for (var f = 0; f < c; f++) {
+            try {
+              e.object.e(r[d + f]);
+            } catch (i) {
+              return Rf(Of), -1;
+            }
+          }
+          e.object.timestamp = Date.now();
+          return f;
+        }
+        Rf(Qf);
+        return -1;
+      }
+      f = e.position;
+      b = vf[b];
+      if (!b || b.object.c) {
+        Rf(Mf), d = -1;
+      } else {
+        if (b.f) {
+          if (b.object.d) {
+            Rf(Pf), d = -1;
+          } else {
+            if (0 > c || 0 > f) {
+              Rf(Nf), d = -1;
+            } else {
+              for (var h = b.object.a; h.length < f; ) {
+                h.push(0);
+              }
+              for (var j = 0; j < c; j++) {
+                h[f + j] = bc[d + j];
+              }
+              b.object.timestamp = Date.now();
+              d = j;
+            }
+          }
+        } else {
+          Rf(Lf), d = -1;
+        }
+      }
+      -1 != d && (e.position += d);
+      return d;
+    }
+    Rf(Lf);
+    return -1;
+  }
+  Rf(Mf);
+  return -1;
+}
+
+function qf(b, d) {
+  function c(b) {
+    var c;
+    "double" === b ? c = (E[0] = B[d + f >> 2], E[1] = B[d + (f + 4) >> 2], D[0]) : "i64" == b ? c = [ B[d + f >> 2], B[d + (f + 4) >> 2] ] : (b = "i32", c = B[d + f >> 2]);
+    f += Math.max(Ya(b), db);
+    return c;
+  }
+  for (var e = b, f = 0, i = [], h, j; ; ) {
+    var k = e;
+    h = r[e];
+    if (0 === h) {
+      break;
+    }
+    j = r[e + 1];
+    if (37 == h) {
+      var o = m, s = m, p = m, w = m;
+      a : for (;;) {
+        switch (j) {
+         case 43:
+          o = g;
+          break;
+         case 45:
+          s = g;
+          break;
+         case 35:
+          p = g;
+          break;
+         case 48:
+          if (w) {
+            break a;
+          } else {
+            w = g;
+            break;
+          }
+         default:
+          break a;
+        }
+        e++;
+        j = r[e + 1];
+      }
+      var u = 0;
+      if (42 == j) {
+        u = c("i32"), e++, j = r[e + 1];
+      } else {
+        for (; 48 <= j && 57 >= j; ) {
+          u = 10 * u + (j - 48), e++, j = r[e + 1];
+        }
+      }
+      var x = m;
+      if (46 == j) {
+        var v = 0, x = g;
+        e++;
+        j = r[e + 1];
+        if (42 == j) {
+          v = c("i32"), e++;
+        } else {
+          for (;;) {
+            j = r[e + 1];
+            if (48 > j || 57 < j) {
+              break;
+            }
+            v = 10 * v + (j - 48);
+            e++;
+          }
+        }
+        j = r[e + 1];
+      } else {
+        v = 6;
+      }
+      var t;
+      switch (String.fromCharCode(j)) {
+       case "h":
+        j = r[e + 2];
+        104 == j ? (e++, t = 1) : t = 2;
+        break;
+       case "l":
+        j = r[e + 2];
+        108 == j ? (e++, t = 8) : t = 4;
+        break;
+       case "L":
+       case "q":
+       case "j":
+        t = 8;
+        break;
+       case "z":
+       case "t":
+       case "I":
+        t = 4;
+        break;
+       default:
+        t = l;
+      }
+      t && e++;
+      j = r[e + 1];
+      if (-1 != "d,i,u,o,x,X,p".split(",").indexOf(String.fromCharCode(j))) {
+        k = 100 == j || 105 == j;
+        t = t || 4;
+        var y = h = c("i" + 8 * t), q;
+        8 == t && (h = 117 == j ? (h[0] >>> 0) + 4294967296 * (h[1] >>> 0) : (h[0] >>> 0) + 4294967296 * (h[1] | 0));
+        4 >= t && (h = (k ? Sc : Rc)(h & Math.pow(256, t) - 1, 8 * t));
+        var z = Math.abs(h), k = "";
+        if (100 == j || 105 == j) {
+          q = 8 == t && Kf ? Kf.stringify(y[0], y[1]) : Sc(h, 8 * t).toString(10);
+        } else {
+          if (117 == j) {
+            q = 8 == t && Kf ? Kf.stringify(y[0], y[1], g) : Rc(h, 8 * t).toString(10), h = Math.abs(h);
+          } else {
+            if (111 == j) {
+              q = (p ? "0" : "") + z.toString(8);
+            } else {
+              if (120 == j || 88 == j) {
+                k = p ? "0x" : "";
+                if (0 > h) {
+                  h = -h;
+                  q = (z - 1).toString(16);
+                  y = [];
+                  for (p = 0; p < q.length; p++) {
+                    y.push((15 - parseInt(q[p], 16)).toString(16));
+                  }
+                  for (q = y.join(""); q.length < 2 * t; ) {
+                    q = "f" + q;
+                  }
+                } else {
+                  q = z.toString(16);
+                }
+                88 == j && (k = k.toUpperCase(), q = q.toUpperCase());
+              } else {
+                112 == j && (0 === z ? q = "(nil)" : (k = "0x", q = z.toString(16)));
+              }
+            }
+          }
+        }
+        if (x) {
+          for (; q.length < v; ) {
+            q = "0" + q;
+          }
+        }
+        for (o && (k = 0 > h ? "-" + k : "+" + k); k.length + q.length < u; ) {
+          s ? q += " " : w ? q = "0" + q : k = " " + k;
+        }
+        q = k + q;
+        q.split("").forEach((function(b) {
+          i.push(b.charCodeAt(0));
+        }));
+      } else {
+        if (-1 != "f,F,e,E,g,G".split(",").indexOf(String.fromCharCode(j))) {
+          h = c("double");
+          if (isNaN(h)) {
+            q = "nan", w = m;
+          } else {
+            if (isFinite(h)) {
+              x = m;
+              t = Math.min(v, 20);
+              if (103 == j || 71 == j) {
+                x = g, v = v || 1, t = parseInt(h.toExponential(t).split("e")[1], 10), v > t && -4 <= t ? (j = (103 == j ? "f" : "F").charCodeAt(0), v -= t + 1) : (j = (103 == j ? "e" : "E").charCodeAt(0), v--), t = Math.min(v, 20);
+              }
+              if (101 == j || 69 == j) {
+                q = h.toExponential(t), /[eE][-+]\d$/.test(q) && (q = q.slice(0, -1) + "0" + q.slice(-1));
+              } else {
+                if (102 == j || 70 == j) {
+                  q = h.toFixed(t);
+                }
+              }
+              k = q.split("e");
+              if (x && !p) {
+                for (; 1 < k[0].length && -1 != k[0].indexOf(".") && ("0" == k[0].slice(-1) || "." == k[0].slice(-1)); ) {
+                  k[0] = k[0].slice(0, -1);
+                }
+              } else {
+                for (p && -1 == q.indexOf(".") && (k[0] += "."); v > t++; ) {
+                  k[0] += "0";
+                }
+              }
+              q = k[0] + (1 < k.length ? "e" + k[1] : "");
+              69 == j && (q = q.toUpperCase());
+              o && 0 <= h && (q = "+" + q);
+            } else {
+              q = (0 > h ? "-" : "") + "inf", w = m;
+            }
+          }
+          for (; q.length < u; ) {
+            q = s ? q + " " : w && ("-" == q[0] || "+" == q[0]) ? q[0] + "0" + q.slice(1) : (w ? "0" : " ") + q;
+          }
+          97 > j && (q = q.toUpperCase());
+          q.split("").forEach((function(b) {
+            i.push(b.charCodeAt(0));
+          }));
+        } else {
+          if (115 == j) {
+            o = c("i8*") || 0;
+            w = Pc(o);
+            x && (w = Math.min(Pc(o), v));
+            if (!s) {
+              for (; w < u--; ) {
+                i.push(32);
+              }
+            }
+            for (p = 0; p < w; p++) {
+              i.push(bc[o++]);
+            }
+            if (s) {
+              for (; w < u--; ) {
+                i.push(32);
+              }
+            }
+          } else {
+            if (99 == j) {
+              for (s && i.push(c("i8")); 0 < --u; ) {
+                i.push(32);
+              }
+              s || i.push(c("i8"));
+            } else {
+              if (110 == j) {
+                s = c("i32*"), B[s >> 2] = i.length;
+              } else {
+                if (37 == j) {
+                  i.push(h);
+                } else {
+                  for (p = k; p < e + 2; p++) {
+                    i.push(r[p]);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      e += 2;
+    } else {
+      i.push(h), e += 1;
+    }
+  }
+  return i;
+}
+
+function kd(b, d) {
+  var c = B[sf >> 2], e = qf(b, d), f = n;
+  var i = G(e, "i8", xc), e = 1 * e.length;
+  0 != e && -1 == tf(c, i, e) && vf[c] && (vf[c].error = g);
+  n = f;
+}
+
+function ne(b, d, c) {
+  if (20 <= c && d % 2 == b % 2) {
+    if (d % 4 == b % 4) {
+      for (c = d + c; d % 4; ) {
+        r[b++] = r[d++];
+      }
+      for (var d = d >> 2, b = b >> 2, e = c >> 2; d < e; ) {
+        B[b++] = B[d++];
+      }
+      d <<= 2;
+      for (b <<= 2; d < c; ) {
+        r[b++] = r[d++];
+      }
+    } else {
+      c = d + c;
+      d % 2 && (r[b++] = r[d++]);
+      d >>= 1;
+      b >>= 1;
+      for (e = c >> 1; d < e; ) {
+        ac[b++] = ac[d++];
+      }
+      d <<= 1;
+      b <<= 1;
+      d < c && (r[b++] = r[d++]);
+    }
+  } else {
+    for (; c--; ) {
+      r[b++] = r[d++];
+    }
+  }
+}
+
+function rf(b) {
+  Jc(Nc);
+  a("exit(" + b + ") called, at " + Error().stack);
+}
+
+var ud = Math.sqrt, de = Math.tan;
+
+function W() {
+  a("abort() at " + Error().stack);
+}
+
+function Jf() {
+  switch (8) {
+   case 8:
+    return Bc;
+   case 54:
+   case 56:
+   case 21:
+   case 61:
+   case 63:
+   case 22:
+   case 67:
+   case 23:
+   case 24:
+   case 25:
+   case 26:
+   case 27:
+   case 69:
+   case 28:
+   case 101:
+   case 70:
+   case 71:
+   case 29:
+   case 30:
+   case 199:
+   case 75:
+   case 76:
+   case 32:
+   case 43:
+   case 44:
+   case 80:
+   case 46:
+   case 47:
+   case 45:
+   case 48:
+   case 49:
+   case 42:
+   case 82:
+   case 33:
+   case 7:
+   case 108:
+   case 109:
+   case 107:
+   case 112:
+   case 119:
+   case 121:
+    return 200809;
+   case 13:
+   case 104:
+   case 94:
+   case 95:
+   case 34:
+   case 35:
+   case 77:
+   case 81:
+   case 83:
+   case 84:
+   case 85:
+   case 86:
+   case 87:
+   case 88:
+   case 89:
+   case 90:
+   case 91:
+   case 94:
+   case 95:
+   case 110:
+   case 111:
+   case 113:
+   case 114:
+   case 115:
+   case 116:
+   case 117:
+   case 118:
+   case 120:
+   case 40:
+   case 16:
+   case 79:
+   case 19:
+    return -1;
+   case 92:
+   case 93:
+   case 5:
+   case 72:
+   case 6:
+   case 74:
+   case 92:
+   case 93:
+   case 96:
+   case 97:
+   case 98:
+   case 99:
+   case 102:
+   case 103:
+   case 105:
+    return 1;
+   case 38:
+   case 66:
+   case 50:
+   case 51:
+   case 4:
+    return 1024;
+   case 15:
+   case 64:
+   case 41:
+    return 32;
+   case 55:
+   case 37:
+   case 17:
+    return 2147483647;
+   case 18:
+   case 1:
+    return 47839;
+   case 59:
+   case 57:
+    return 99;
+   case 68:
+   case 58:
+    return 2048;
+   case 0:
+    return 2097152;
+   case 3:
+    return 65536;
+   case 14:
+    return 32768;
+   case 73:
+    return 32767;
+   case 39:
+    return 16384;
+   case 60:
+    return 1e3;
+   case 106:
+    return 700;
+   case 52:
+    return 256;
+   case 62:
+    return 255;
+   case 2:
+    return 100;
+   case 65:
+    return 64;
+   case 36:
+    return 20;
+   case 100:
+    return 16;
+   case 20:
+    return 6;
+   case 53:
+    return 4;
+  }
+  Rf(Nf);
+  return -1;
+}
+
+function Cf(b) {
+  Gg || (Tb = Tb + 4095 >> 12 << 12, Gg = g);
+  var d = Tb;
+  0 != b && Sb(b);
+  return d;
+}
+
+var Gg;
+
+function yc(b, d) {
+  var c = 0;
+  if (20 <= d) {
+    for (var e = b + d; b % 4; ) {
+      r[b++] = c;
+    }
+    0 > c && (c += 256);
+    for (var f = b >> 2, i = e >> 2, h = c | c << 8 | c << 16 | c << 24; f < i; ) {
+      B[f++] = h;
+    }
+    for (b = f << 2; b < e; ) {
+      r[b++] = c;
+    }
+  } else {
+    for (; d--; ) {
+      r[b++] = c;
+    }
+  }
+}
+
+Kc.unshift({
+  n: (function() {
+    !Module.noFSInit && !wg && vg();
+  })
+});
+
+Lc.push({
+  n: (function() {
+    Vf = m;
+  })
+});
+
+Nc.push({
+  n: (function() {
+    wg && (vf[2] && 0 < vf[2].object.e.buffer.length && vf[2].object.e(10), vf[3] && 0 < vf[3].object.e.buffer.length && vf[3].object.e(10));
+  })
+});
+
+Module.FS_createFolder = bg;
+
+Module.FS_createPath = fg;
+
+Module.FS_createDataFile = (function(b, d, c, e, f) {
+  if ("string" === typeof c) {
+    for (var i = Array(c.length), h = 0, j = c.length; h < j; ++h) {
+      i[h] = c.charCodeAt(h);
+    }
+    c = i;
+  }
+  return hg(b, d, {
+    c: m,
+    a: c
+  }, e, f);
+});
+
+Module.FS_createLazyFile = (function(b, d, c, e, f) {
+  return hg(b, d, {
+    c: m,
+    url: c
+  }, e, f);
+});
+
+Module.FS_createLink = (function(b, d, c, e, f) {
+  return hg(b, d, {
+    c: m,
+    link: c
+  }, e, f);
+});
+
+Module.FS_createDevice = ug;
+
+Rf(0);
+
+Module.requestFullScreen = (function() {
+  Ag();
+});
+
+Module.requestAnimationFrame = (function(b) {
+  window.A || (window.A = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.oRequestAnimationFrame || window.setTimeout);
+  window.A(b);
+});
+
+Module.pauseMainLoop = (function() {});
+
+Module.resumeMainLoop = (function() {
+  xg && (xg = m, l());
+});
+
+var uf = G([ 0 ], "i8", F);
+
+Module.K = (function(b) {
+  function d() {
+    for (var b = 0; 3 > b; b++) {
+      e.push(0);
+    }
+  }
+  var c = b.length + 1, e = [ G(Fc("/bin/this.program"), "i8", F) ];
+  d();
+  for (var f = 0; f < c - 1; f += 1) {
+    e.push(G(Fc(b[f]), "i8", F)), d();
+  }
+  e.push(0);
+  e = G(e, "i32", F);
+  return Yc(c, e);
+});
+
+var je, he, ge, Zc, md, ed, V, zf;
+
+je = G([ jc ], [ "%struct.SDL_Surface*", 0, 0, 0 ], F);
+
+he = G(2560, "i8", F);
+
+ge = G(4, "i32", F);
+
+Zc = G(16, [ "i32", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "*", 0, 0, 0 ], F);
+
+md = G([ jc ], [ "%cls0*", 0, 0, 0 ], F);
+
+ed = G([ jc ], [ "%cls1*", 0, 0, 0 ], F);
+
+Qc.i = G([ 37, 46, 42, 115, 10, 0 ], "i8", F);
+
+Qc.G = G([ 37, 100, 37, 37, 32, 99, 111, 109, 112, 108, 101, 116, 101, 10, 0 ], "i8", F);
+
+Qc.H = G([ 67, 111, 109, 112, 108, 101, 116, 101, 46, 0 ], "i8", F);
+
+Qc.I = G([ 116, 101, 115, 116, 95, 114, 97, 121, 116, 114, 97, 99, 101, 0 ], "i8", F);
+
+Qc.C = G([ 37, 108, 108, 100, 0 ], "i8", F);
+
+Qc.D = G([ 73, 110, 100, 101, 120, 69, 114, 114, 111, 114, 58, 32, 37, 108, 108, 100, 10, 0 ], "i8", F);
+
+Qc.F = G([ 100, 101, 99, 114, 101, 109, 101, 110, 116, 101, 100, 32, 97, 32, 114, 101, 102, 99, 111, 117, 110, 116, 32, 116, 111, 32, 98, 101, 108, 111, 119, 32, 48, 33, 0 ], "i8", F);
+
+V = G(468, [ "i32", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "*", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "i32", 0, 0, 0, "*", 0, 0, 0, "i32", 0, 0, 0, "*", 0, 0, 0, "i32", 0, 0, 0, "*", 0, 0, 0, "i32", 0, 0, 0 ], F);
+
+zf = G(24, "i32", F);
+
+zc = [ 0, 0, (function(b, d) {
+  return zc[B[b + 16 >> 2]](B[b + 12 >> 2], d);
+}), 0, (function(b) {
+  jf(B[b + 12 >> 2]);
+}), 0, (function(b, d) {
+  var c = B[b + 12 >> 2];
+  nd(c);
+  var e = d + 4 | 0, e = (E[0] = B[e >> 2], E[1] = B[e + 4 >> 2], D[0]), f = d + 12 | 0, f = (E[0] = B[f >> 2], E[1] = B[f + 4 >> 2], D[0]), i = d + 20 | 0, i = (E[0] = B[i >> 2], E[1] = B[i + 4 >> 2], D[0]), h = c + 4 | 0, h = (E[0] = B[h >> 2], E[1] = B[h + 4 >> 2], D[0]), j = c + 12 | 0, j = (E[0] = B[j >> 2], E[1] = B[j + 4 >> 2], D[0]), k = c + 20 | 0, k = (E[0] = B[k >> 2], E[1] = B[k + 4 >> 2], D[0]), e = vd(e, f, i, h, j, k);
+  Q(c);
+  c = e + 4 | 0;
+  c = (E[0] = B[c >> 2], E[1] = B[c + 4 >> 2], D[0]);
+  f = e + 12 | 0;
+  f = (E[0] = B[f >> 2], E[1] = B[f + 4 >> 2], D[0]);
+  i = e + 20 | 0;
+  i = (E[0] = B[i >> 2], E[1] = B[i + 4 >> 2], D[0]);
+  c = td(c, f, i);
+  L(e);
+  return c;
+}), 0, (function(b, d) {
+  return zc[B[b + 16 >> 2]](B[b + 12 >> 2], d);
+}), 0, (function(b) {
+  jf(B[b + 12 >> 2]);
+}), 0, xd, 0, (function(b, d, c, e, f) {
+  return zc[B[b + 16 >> 2]](B[b + 12 >> 2], d, c, e, f);
+}), 0, (function(b) {
+  hf(B[b + 12 >> 2]);
+}), 0, He, 0, (function(b, d) {
+  return zc[B[b + 16 >> 2]](B[b + 12 >> 2], d);
+}), 0, (function(b) {
+  nf(B[b + 12 >> 2]);
+}), 0, (function(b) {
+  b = B[b + 4 >> 2];
+  gd(b);
+  return b;
+}), 0, (function(b, d) {
+  return zc[B[b + 16 >> 2]](B[b + 12 >> 2], d);
+}), 0, (function(b) {
+  nf(B[b + 12 >> 2]);
+}), 0, (function(b, d) {
+  var c = B[d + 4 >> 2];
+  gd(c);
+  var e = B[b + 4 >> 2];
+  gd(e);
+  var f = c + 4 | 0, f = (E[0] = B[f >> 2], E[1] = B[f + 4 >> 2], D[0]), i = c + 12 | 0, i = (E[0] = B[i >> 2], E[1] = B[i + 4 >> 2], D[0]), h = c + 20 | 0, h = (E[0] = B[h >> 2], E[1] = B[h + 4 >> 2], D[0]), j = e + 4 | 0, j = (E[0] = B[j >> 2], E[1] = B[j + 4 >> 2], D[0]), k = e + 12 | 0, k = (E[0] = B[k >> 2], E[1] = B[k + 4 >> 2], D[0]), o = e + 20 | 0, o = (E[0] = B[o >> 2], E[1] = B[o + 4 >> 2], D[0]), f = f * j + h * o + i * k;
+  L(e);
+  L(c);
+  return 0 != f ? 1 / -f : 1e9 + 1;
+}), 0, (function(b, d, c, e, f) {
+  return zc[B[b + 16 >> 2]](B[b + 12 >> 2], d, c, e, f);
+}), 0, (function(b) {
+  mf(B[b + 12 >> 2]);
+}), 0, Ke, 0 ];
+
+Module.FUNCTION_TABLE = zc;
+
+function Vc(b) {
+  function d() {
+    var c = 0;
+    Module._main && (Jc(Lc), c = Module.K(b), Module.noExitRuntime || Jc(Nc));
+    if (Module.postRun) {
+      for ("function" == typeof Module.postRun && (Module.postRun = [ Module.postRun ]); 0 < Module.postRun.length; ) {
+        Module.postRun.pop()();
+      }
+    }
+    return c;
+  }
+  b = b || Module.arguments;
+  if (Module.preRun) {
+    for ("function" == typeof Module.preRun && (Module.preRun = [ Module.preRun ]); 0 < Module.preRun.length; ) {
+      if (Module.preRun.pop()(), 0 < Tc) {
+        return 0;
+      }
+    }
+  }
+  return Module.setStatus ? (Module.setStatus("Running..."), setTimeout((function() {
+    setTimeout((function() {
+      Module.setStatus("");
+    }), 1);
+    d();
+  }), 1), 0) : d();
+}
+
+Module.run = Vc;
+
+Jc(Kc);
+
+Module.noInitialRun && Uc();
+
+0 == Tc && Vc();
+
+
+    </script>
+  </body>
+</html>

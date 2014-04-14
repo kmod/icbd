@@ -1,0 +1,20 @@
+define $(r) @$(n)_call$(this_nargs)($(call_args)) alwaysinline {
+    %f = bitcast $(callable_type) %self to %$(n)*
+    %ptr_p = getelementptr inbounds %$(n)* %f, i32 0, i32 2
+    %func = load $(func_type)* %ptr_p
+
+    $(IFCLOSURE) %closure_ptr = getelementptr %$(n)* %f, i64 0, i32 3
+    $(IFCLOSURE) %closure = load $(closure_type)* %closure_ptr
+
+    $(load_defaults)
+
+    %r = call $(func_type) %func(
+    $(IFCLOSURE) $(closure_type) %closure
+    $(func_args) $(defaults_args))
+
+    ; TODO I think it's safe to not have these:
+    $(decref_defaults)
+
+    ret $(r) %r
+}
+

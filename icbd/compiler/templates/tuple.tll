@@ -1,0 +1,99 @@
+; Schema is: nrefs, elts
+%$(n) = type {$(type_str)}
+$(make_typeobj(em, n))
+
+declare i1 @$(n)_eq(%$(n)*, %$(n)*)
+declare i1 @$(n)_lt(%$(n)*, %$(n)*)
+
+define %$(n)* @$(n)_ctor($(arg_str)) {
+    %sizeof_p = getelementptr %$(n)* null, i64 1
+    %sizeof = ptrtoint %$(n)* %sizeof_p to i64
+    %alloc = call noalias i8* @my_malloc(i64 %sizeof, i8* $(alloc_name))
+    %rtn = bitcast i8* %alloc to %$(n)*
+
+    %ref_ptr = getelementptr inbounds %$(n)* %rtn, i64 0, i32 0
+    store i64 1, i64* %ref_ptr
+
+    $(assign_all)
+    ret %$(n)* %rtn
+}
+
+define i64 @$(n)_len(%$(n)* %self) {
+    ret i64 $(len)
+}
+
+define i64 @$(n)_chref(%$(n)* %self, i64 %inc) {
+    %ref_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 0
+    %nrefs = load i64* %ref_ptr
+    %new_refs = add i64 %nrefs, %inc
+    store i64 %new_refs, i64* %ref_ptr
+    ret i64 %new_refs
+}
+
+define void @$(n)_incref(%$(n)* %self) {
+    %isnull = icmp eq %$(n)* %self, null
+    br i1 %isnull, label %ifnull, label %ifnotnull
+ifnull:
+    ret void
+
+ifnotnull:
+    %refs = call i64 @$(n)_chref(%$(n)* %self, i64 1)
+    ret void
+}
+
+define void @$(n)_decref(%$(n)* %self) alwaysinline {
+    %isnull = icmp eq %$(n)* %self, null
+    br i1 %isnull, label %ifnull, label %ifnotnull
+ifnull:
+    ret void
+
+ifnotnull:
+    %refs = call i64 @$(n)_chref(%$(n)* %self, i64 -1)
+    %unused = icmp sle i64 %refs, 0
+    br i1 %unused, label %dealloc, label %done
+dealloc:
+    %bad = icmp slt i64 %refs, 0
+    $(DEBUG_CHECKS) br i1 %bad, label %err, label %do_free
+    $(NO_DEBUG_CHECKS) br label %do_free
+do_free:
+    $(decref_all)
+    %cast = bitcast %$(n)* %self to i8*
+    call void @my_free(i8* nocapture %cast, i8* $(alloc_name))
+    br label %done
+err:
+    call void @raise_over_free_error() noreturn
+    unreachable
+done:
+    ret void
+}
+
+define %string* @$(n)_repr(%$(n)* %self) {
+    %isnull = icmp eq %$(n)* %self, null
+    br i1 %isnull, label %ifnull, label %func_start
+ifnull:
+    %r = call %string* @none_repr(%none* null)
+    ret %string* %r
+
+func_start:
+    %open = call %string* @str_from_const(i8* getelementptr inbounds ([2 x i8]* @str_open_paren, i64 0, i32 0), i64 1)
+    %comma = call %string* @str_from_const(i8* getelementptr inbounds ([2 x i8]* @str_comma, i64 0, i32 0), i64 1)
+    %commaspace = call %string* @str_from_const(i8* getelementptr inbounds ([3 x i8]* @str_comma_space, i64 0, i32 0), i64 2)
+    %end_paren = call %string* @str_from_const(i8* getelementptr inbounds ([2 x i8]* @str_close_paren, i64 0, i32 0), i64 1)
+    %empty = call %string* @str_from_const(i8* null, i64 0)
+
+    %list = call %list_string* @list_string_ctor()
+    call void @list_string_append(%list_string* %list, %string* %open)
+
+    $(add_all_str)
+    call void @list_string_append(%list_string* %list, %string* %end_paren)
+    %rtn = call %string* @str_join(%string* %empty, %list_string* %list)
+
+    call void @str_decref(%string* %open)
+    call void @str_decref(%string* %comma)
+    call void @str_decref(%string* %commaspace)
+    call void @str_decref(%string* %end_paren)
+    call void @str_decref(%string* %empty)
+    call void @list_string_decref(%list_string* %list)
+
+    ret %string* %rtn
+}

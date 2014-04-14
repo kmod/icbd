@@ -1,0 +1,66 @@
+$$(e = et.c_type())
+
+$(it.c_type()) $(t.get_method_name(em, "__iter__"))($(t.c_type()));
+$(e) min$(num)($(t.c_type()) l) {
+    i1 empty = true;
+    $(e) rtn;
+
+    $$(i = Variable(t, "l", 1, False).getattr(em, "__iter__").call(em, []))
+
+    while (true) {
+        $$(n = i.getattr(em, "hasnext", decvref=False).call(em, []))
+        if (!$(n.v[1:]))
+            break;
+        $$(elt = i.getattr(em, "next", decvref=False).call(em, []))
+        if (empty) {
+            rtn = $(elt.v[1:]);
+            empty = false;
+        } else {
+            $$(r = Variable(et, "rtn", 2, False))
+            $$(lt = elt.getattr(em, "__lt__", decvref=False).call(em, [r]))
+            if ($(lt.v[1:])) {
+                $$(r.getattr(em, "__decref__", decvref=False).call(em, []))
+                rtn = $(elt.v[1:]);
+            } else {
+                $$(elt.getattr(em, "__decref__", decvref=False).call(em, []))
+            }
+        }
+    }
+
+    $$(i.decvref(em))
+
+    assert(!empty);
+    return rtn;
+}
+
+$(e) max$(num)($(t.c_type()) l) {
+    i1 empty = true;
+    $(e) rtn;
+
+    $$(i = Variable(t, "l", 1, False).getattr(em, "__iter__").call(em, []))
+
+    while (true) {
+        $$(n = i.getattr(em, "hasnext", decvref=False).call(em, []))
+        if (!$(n.v[1:]))
+            break;
+        $$(elt = i.getattr(em, "next", decvref=False).call(em, []))
+        if (empty) {
+            rtn = $(elt.v[1:]);
+            empty = false;
+        } else {
+            $$(r = Variable(et, "rtn", 2, False))
+            $$(lt = elt.getattr(em, "__lt__", decvref=False).call(em, [r]))
+            if (!$(lt.v[1:])) {
+                $$(r.getattr(em, "__decref__", decvref=False).call(em, []))
+                rtn = $(elt.v[1:]);
+            } else {
+                $$(elt.getattr(em, "__decref__", decvref=False).call(em, []))
+            }
+        }
+    }
+
+    $$(i.decvref(em))
+
+    assert(!empty);
+    return rtn;
+}

@@ -1,0 +1,35 @@
+*** lib/Analysis/MemoryBuiltins.cpp	2012-06-14 18:55:56.062457963 -0700
+***************
+*** 38,43 ****
+--- 38,44 ----
+    if (Callee == 0 || !Callee->isDeclaration())
+      return false;
+    if (Callee->getName() != "malloc" &&
++       Callee->getName() != "my_malloc" &&
+        Callee->getName() != "_Znwj" && // operator new(unsigned int)
+        Callee->getName() != "_Znwm" && // operator new(unsigned long)
+        Callee->getName() != "_Znaj" && // operator new[](unsigned int)
+***************
+*** 194,199 ****
+--- 195,201 ----
+      return 0;
+  
+    if (Callee->getName() != "free" &&
++       Callee->getName() != "my_free" &&
+        Callee->getName() != "_ZdlPv" && // operator delete(void*)
+        Callee->getName() != "_ZdaPv")   // operator delete[](void*)
+      return 0;
+
+*** lib/Transforms/Scalar/IndVarSimplify.cpp  2012-07-15 18:48:39.398800585 -0700
+***************
+*** 1488,1493 ****
+--- 1488,1496 ----
+    assert(ExitCnt->getType()->isPointerTy() == IndVar->getType()->isPointerTy()
+           && "genLoopLimit missed a cast");
+
++   if (isa<UndefValue>(ExitCnt))
++       return NULL;
++
+    // Insert a new icmp_ne or icmp_eq instruction before the branch.
+    BranchInst *BI = cast<BranchInst>(L->getExitingBlock()->getTerminator());
+    ICmpInst::Predicate P;

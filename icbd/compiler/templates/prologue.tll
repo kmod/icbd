@@ -1,0 +1,46 @@
+; This helps with optimization; not sure if it makes it less portable
+target datalayout = "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128"
+
+; stdlib functions:
+declare i32 @printf(i8* nocapture noalias, ...) nounwind
+declare i64 @snprintf(i8* nocapture noalias, i64, i8* nocapture noalias, ...) nounwind
+declare noalias i8* @my_malloc(i64, i8* nocapture noalias) nounwind
+declare i8* @my_realloc(i8* nocapture, i64, i8* nocapture noalias) nounwind
+declare void @my_free(i8* nocapture, i8* nocapture noalias) nounwind
+declare void @memset(i8* nocapture noalias, i8, i64) nounwind
+declare i8* @memcpy(i8* nocapture noalias, i8* nocapture noalias, i64) nounwind
+declare i8* @strncpy(i8* nocapture noalias, i8* nocapture noalias, i64) nounwind
+declare i64 @write(i32, i8* nocapture noalias, i64) nounwind
+
+; runtime stuff:
+declare void @init_runtime(i64, i8**)
+declare void @teardown_runtime()
+declare void @raise_index_error(i64)
+declare void @raise_over_free_error()
+declare void @raise_called_none_error()
+
+; helper functions I didn't want to write in llvm:
+declare i64 @int_pow(i64, i64)
+declare i64 @int_mod(i64, i64)
+declare i64 @int_div(i64, i64)
+declare double @float_pow(double, double)
+declare double @float_(i64)
+declare %tuple2_i64_i64* @divmod(i64, i64)
+
+@str_open_bracket = internal constant [2 x i8] c"[\00"
+@str_close_bracket = internal constant [2 x i8] c"]\00"
+@str_open_paren = internal constant [2 x i8] c"(\00"
+@str_close_paren = internal constant [2 x i8] c")\00"
+@str_comma = internal constant [2 x i8] c",\00"
+@str_comma_space = internal constant [3 x i8] c", \00"
+@str_newline = global %string undef
+@str_space = global %string undef
+declare void @print_space_if_necessary(%string*)
+
+@sys_argv = global %list_string undef
+@sys_stdin = global %file undef
+@sys_stdout = global %file undef
+@sys_stderr = global %file undef
+
+%slice = type {i64, i64, i64, i64, i64}
+%underlying = type opaque

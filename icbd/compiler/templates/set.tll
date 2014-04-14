@@ -1,0 +1,16 @@
+%$(n) = type opaque
+$(make_typeobj(em, n))
+%$(iter_name) = type opaque
+declare %$(n)* @$(n)_ctor()
+declare void @$(n)_incref(%$(n)*)
+declare void @$(n)_decref(%$(n)*)
+declare void @$(n)_add(%$(n)*, $(e))
+declare %string* @$(n)_repr(%$(n)*)
+declare i1 @$(n)_contains(%$(n)*, $(e))
+declare i64 @$(n)_len(%$(n)*)
+
+declare %$(iter_name)* @$(n)_iter(%$(n)*)
+declare void @$(iter_name)_decref(%$(iter_name)*)
+declare void @$(iter_name)_incref(%$(iter_name)*)
+declare i1 @$(iter_name)_hasnext(%$(iter_name)*)
+declare $(e) @$(iter_name)_next(%$(iter_name)*)

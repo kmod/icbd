@@ -1,0 +1,6 @@
+typedef struct{
+    i64 nrefs;
+    $("\n    ".join(["    void* call%d;" % (i,) for i in xrange(nargs - ndefaults, nargs + 1)]));
+    void* decref;
+} $(n);
+

@@ -1,0 +1,76 @@
+%$(n) = type {$(type_str)}
+$(make_typeobj(em, n, displayname))
+
+define %$(n)* @$(n)_new($(new_args)) {
+    %sizeof_p = getelementptr %$(n)* null, i64 1
+    %sizeof = ptrtoint %$(n)* %sizeof_p to i64
+    %alloc = call noalias i8* @my_malloc(i64 %sizeof, i8* $(alloc_name))
+    call void @memset(i8* %alloc, i8 0, i64 %sizeof)
+    %rtn = bitcast i8* %alloc to %$(n)*
+
+    %ref_ptr = getelementptr inbounds %$(n)* %rtn, i64 0, i32 0
+    store i64 1, i64* %ref_ptr
+
+    $(init)
+
+    ret %$(n)* %rtn
+}
+
+define i64 @$(n)_chref(%$(n)* %self, i64 %inc) {
+    %ref_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 0
+    %nrefs = load i64* %ref_ptr
+    %new_refs = add i64 %nrefs, %inc
+    store i64 %new_refs, i64* %ref_ptr
+    ret i64 %new_refs
+}
+
+define void @$(n)_incref(%$(n)* %self) {
+    %isnull = icmp eq %$(n)* %self, null
+    br i1 %isnull, label %ifnull, label %ifnotnull
+ifnull:
+    ret void
+
+ifnotnull:
+    %refs = call i64 @$(n)_chref(%$(n)* %self, i64 1)
+    ret void
+}
+
+define void @$(n)_decref(%$(n)* %self) alwaysinline {
+    %isnull = icmp eq %$(n)* %self, null
+    br i1 %isnull, label %ifnull, label %ifnotnull
+ifnull:
+    ret void
+
+ifnotnull:
+    %refs = call i64 @$(n)_chref(%$(n)* %self, i64 -1)
+    %unused = icmp sle i64 %refs, 0
+    br i1 %unused, label %dealloc, label %done
+dealloc:
+    %bad = icmp slt i64 %refs, 0
+    $(DEBUG_CHECKS) br i1 %bad, label %err, label %do_free
+    $(NO_DEBUG_CHECKS) br label %do_free
+do_free:
+    $(decref_all)
+    %cast = bitcast %$(n)* %self to i8*
+    call void @my_free(i8* nocapture %cast, i8* $(alloc_name))
+    br label %done
+err:
+    call void @raise_over_free_error() noreturn
+    unreachable
+done:
+    ret void
+}
+
+define %string* @$(n)_repr(%$(n)* %self) {
+    %r = call %string* @instance_repr(%type* @$(n)_typeobj)
+    ret %string* %r
+}
+
+define i1 @$(n)_eq(%$(n)* %self, %$(n)* %rhs) {
+    %r = icmp eq %$(n)* %self, %rhs
+    ret i1 %r
+}
+
+define i1 @$(n)_nonzero(%$(n)* %self) {
+    ret i1 true
+}

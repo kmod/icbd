@@ -1,0 +1,18 @@
+$$(ie = input_type.elt_type.c_type())
+$$(i = input_type.c_type())
+$$(re = return_type.elt_type.c_type())
+$$(r = return_type.c_type())
+$$(ret = return_type.elt_type)
+
+$(r) $(name)($(i) l) {
+    $(r) rtn = $(return_type.get_ctor_name()[1:])();
+
+    for (i64 i = 0; i < l->size; i++) {
+        $(ie) e = $(input_type.get_method_name(em, "__getitem__"))(l, i);
+        $(ret.c_type()) t = $(ret.get_ctor_name()[1:])(i, e);
+        $(input_type.elt_type.get_method_name(em, "__decref__"))(e);
+        $(return_type.get_method_name(em, "append"))(rtn, t);
+        $(ret.get_method_name(em, "__decref__"))(t);
+    }
+    return rtn;
+}

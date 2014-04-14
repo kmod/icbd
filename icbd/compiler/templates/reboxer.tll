@@ -1,0 +1,54 @@
+$$(o = orig_type.llvm_type())
+$$(d = new_type.llvm_type())
+
+@$(n)_vtable = constant $(new_type.vtable_type()) {void ($(d))* @$(n)_dtor, $(call_type.llvm_type()) @$(n)_call}
+%$(n) = type {i64, $(new_type.vtable_type())*, $(o)}
+
+define $(d) @$(n)_ctor($(o) %orig) {
+    %sizeof_p = getelementptr %$(n)* null, i64 1
+    %sizeof = ptrtoint %$(n)* %sizeof_p to i64
+    %malloc = tail call noalias i8* @my_malloc(i64 %sizeof, i8* $(em.get_str_ptr("$(n)"))) nounwind
+    %made = bitcast i8* %malloc to %$(n)*
+
+    %ref_ptr = getelementptr %$(n)* %made, i64 0, i32 0
+    store i64 1, i64* %ref_ptr
+
+    %vtable_ptr = getelementptr %$(n)* %made, i64 0, i32 1
+    store $(new_type.vtable_type())* @$(n)_vtable, $(new_type.vtable_type())** %vtable_ptr
+    $$$(
+    Variable(orig_type, "%orig", 1, False).getattr(em, "__incref__").call(em, [])
+    )$$$
+
+    %c_ptr = getelementptr %$(n)* %made, i64 0, i32 2
+    store $(o) %orig, $(o)* %c_ptr
+
+    %rtn = bitcast %$(n)* %made to $(d)
+    ret $(d) %rtn
+}
+
+define $(new_type.rtn_type.llvm_type()) @$(n)_call($(", ".join(["%s %%c" % d] + ["%s %%arg%s" % (a.llvm_type(), i) for (i, a) in enumerate(new_type.arg_types)]))) {
+    %self = bitcast $(d) %c to %$(n)*
+
+    %c_ptr = getelementptr %$(n)* %self, i64 0, i32 2
+    %orig_c = load $(o)* %c_ptr
+
+    $$$(
+    vars = [Variable(a, "%%arg%d" % i, 1, False) for (i, a) in enumerate(new_type.arg_types)]
+    func_rtn = Variable(orig_type, "%orig_c", 1, False).call(em, vars)
+    rtn = func_rtn.convert_to(em, new_type.rtn_type)
+    )$$$
+
+    ret $(new_type.rtn_type.llvm_type()) $(rtn.v)
+}
+
+define void @$(n)_dtor($(d) %c) {
+    %self = bitcast $(d) %c to %$(n)*
+
+    %c_ptr = getelementptr %$(n)* %self, i64 0, i32 2
+    %orig_c = load $(o)* %c_ptr
+
+    $$$(
+    Variable(orig_type, "%orig_c", 1, False).getattr(em, "__decref__").call(em, [])
+    )$$$
+    ret void
+}

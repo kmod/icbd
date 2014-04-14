@@ -1,0 +1,194 @@
+$$(e = et.c_type())
+typedef struct {
+    i64 nrefs;
+    i64 capacity;
+    i64 start, end;
+    i64 mod_id;
+    $(e) *elts;
+} $(n);
+
+typedef struct {
+    i64 nrefs;
+    $(n)* deque;
+    i64 idx;
+    i64 mod_id;
+} $(i);
+
+$(n)* $(n)_ctor() {
+    $(n)* rtn = ($(n)*)my_malloc(sizeof($(n)), "$(n)_ctor");
+    rtn->nrefs = 1;
+    rtn->capacity = 10;
+    rtn->start = rtn->end = 4;
+    rtn->mod_id = 0;
+    rtn->elts = ($(e)*)my_malloc(10 * sizeof($(e)), "$(n)_elts");
+    return rtn;
+}
+
+void $(n)_incref($(n)* self) {
+    if (self == NULL)
+        return;
+
+    self->nrefs++;
+}
+
+void $(n)_decref($(n)* self) {
+    if (self == NULL)
+        return;
+
+    self->nrefs--;
+    if (self->nrefs == 0) {
+        int n = self->end;
+        for (int i = self->start; i < n; i++) {
+            $(et.decref_c(em, "self->elts[i]"));
+        }
+        my_free((char*)self->elts, "$(n)_elts");
+        my_free((char*)self, "$(n)");
+    } else if (self->nrefs < 0) {
+        raise_over_free_error();
+    }
+}
+
+i1 $(n)_nonzero($(n)* self) {
+    return (self->end > self->start);
+}
+
+static void _$(n)_resize($(n)* self) {
+    i64 used = self->end - self->start;
+    i64 new_capacity = used * 2;
+    $(e) *new_elts = ($(e)*)my_malloc(new_capacity * sizeof($(e)), "$(n)_elts resize");
+    i64 new_start = new_capacity / 4;
+
+    memmove(new_elts + new_start, self->elts + self->start, used * sizeof($(e)));
+
+    my_free((char*)self->elts, "$(n)_elts resize");
+    self->elts = new_elts;
+    self->capacity = new_capacity;
+    self->start = new_start;
+    self->end = new_start + used;
+
+    self->mod_id++;
+}
+
+void $(n)_append($(n)* self, $(e) elt) {
+    if (self->end >= self->capacity)
+        _$(n)_resize(self);
+    assert(self->capacity > self->end);
+
+    self->elts[self->end] = elt;
+    self->end++;
+    $$$(
+    Variable(et, "elt", 1, False).getattr(em, "__incref__").call(em, [])
+    )$$$
+    self->mod_id++;
+}
+
+void $(n)_appendleft($(n)* self, $(e) elt) {
+    if (self->start <= 0)
+        _$(n)_resize(self);
+    assert(self->start > 0);
+
+    self->start--;
+    self->elts[self->start] = elt;
+    $$$(
+    Variable(et, "elt", 1, False).getattr(em, "__incref__").call(em, [])
+    )$$$
+    self->mod_id++;
+}
+
+$(e) $(n)_popleft($(n)* self) {
+    assert(self->start < self->end && "pop from empty deque");
+
+    $(e) rtn = self->elts[self->start];
+    self->start++;
+    self->mod_id++;
+    return rtn;
+}
+
+$(e) $(n)_pop($(n)* self) {
+    assert(self->start < self->end && "pop from empty deque");
+
+    self->end--;
+    $(e) rtn = self->elts[self->end];
+    self->mod_id++;
+    return rtn;
+}
+
+string* $(n)_repr($(n)* self) {
+    if (self == NULL)
+        return str_from_const("None", 4);
+    return str_from_const("deque($(n))", $(5 + len(n)));
+}
+
+i1 $(n)_contains($(n)* self, $(e) elt) {
+    int n = self->end;
+    for (int i = self->start; i < n; i++) {
+        $$$(
+        b = Variable(et, "elt", 1, False).getattr(em, "__eq__").call(em, [Variable(et, "self->elts[i]", 1, False)])
+        assert b.v.startswith('%')
+        )$$$
+        if ($(b.v[1:]))
+            return true;
+    }
+    return false;
+}
+
+i64 $(n)_len($(n)* self) {
+    return self->end - self->start;
+}
+
+i1 $(n)_eq($(n)* lhs, $(n)* rhs) {
+    assert(0 && "Not implemented");
+    return (lhs == rhs);
+}
+
+$(i)* $(n)_iter($(n)* self) {
+    $(i)* rtn = ($(i)*) my_malloc(sizeof($(i)), "$(n)_iter");
+    rtn->nrefs = 1;
+    rtn->deque = self;
+    rtn->idx = self->start;
+    rtn->mod_id = self->mod_id;
+
+    $(n)_incref(self);
+    return rtn;
+}
+
+void $(i)_decref($(i)* self) {
+    if (self == NULL)
+        return;
+
+    self->nrefs--;
+    if (self->nrefs == 0) {
+        $(n)_decref(self->deque);
+        my_free((char*)self, "$(n)_iter");
+    } else if (self->nrefs < 0) {
+        raise_over_free_error();
+    }
+}
+
+void $(i)_incref($(i)* self) {
+    if (self == NULL)
+        return;
+    self->nrefs++;
+}
+
+i1 $(i)_hasnext($(i)* self) {
+    assert(self->mod_id == self->deque->mod_id && "collection has changed during iteration");
+    return self->idx < self->deque->end;
+}
+
+$(e) $(i)_next($(i)* self) {
+    assert(self->mod_id == self->deque->mod_id && "collection has changed during iteration");
+    i64 idx = self->idx;
+    if (idx >= self->deque->end) {
+        printf("StopIteration\n");
+        exit(-6);
+    }
+    self->idx++;
+    $(e) rtn = self->deque->elts[idx];
+    $$$(
+    Variable(et, "rtn", 1, False).getattr(em, "__incref__").call(em, [])
+    )$$$
+    return rtn;
+}
+
+

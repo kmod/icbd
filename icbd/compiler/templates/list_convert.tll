@@ -1,0 +1,37 @@
+define $(rtn_type.llvm_type()) $(func_name)($(iter_type.llvm_type()) %iter) {
+    %rtn = call $(rtn_type.llvm_type()) $(rtn_type.get_ctor_name())()
+
+    $$$(
+    iter = Variable(iter_type, "%iter", 1, False)
+    iter.incvref(em)
+    next = iter.getattr(em, "next")
+    hasnext = iter.getattr(em, "hasnext")
+    rtn = Variable(rtn_type, "%rtn", 1, True)
+    )$$$
+
+    br label %hasnext
+
+hasnext:
+    $$$(
+    hasnext.incvref(em)
+    h = hasnext.call(em, [])
+    )$$$
+
+    br i1 $(h.v), label %next, label %done
+
+next:
+    $$$(
+    next.incvref(em)
+    n = next.call(em, [])
+    rtn.incvref(em)
+    rtn.getattr(em, add_func_name).call(em, [n])
+    )$$$
+    br label %hasnext
+
+done:
+    $$$(
+    next.decvref(em)
+    hasnext.decvref(em)
+    )$$$
+    ret $(rtn_type.llvm_type()) %rtn
+}

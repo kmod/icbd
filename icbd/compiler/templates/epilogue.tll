@@ -1,0 +1,352 @@
+%none = type opaque
+
+define internal i64 @int_add(i64 %a, i64 %b) alwaysinline {
+    %r = add nsw i64 %a, %b
+    ret i64 %r
+}
+define internal i64 @int_sub(i64 %a, i64 %b) alwaysinline {
+    %r = sub nsw i64 %a, %b
+    ret i64 %r
+}
+define internal i64 @int_and(i64 %a, i64 %b) alwaysinline {
+    %r = and i64 %a, %b
+    ret i64 %r
+}
+define internal i64 @int_or(i64 %a, i64 %b) alwaysinline {
+    %r = or i64 %a, %b
+    ret i64 %r
+}
+define internal i64 @int_rshift(i64 %a, i64 %b) alwaysinline {
+    %r = ashr i64 %a, %b
+    ret i64 %r
+}
+define internal i64 @int_lshift(i64 %a, i64 %b) alwaysinline {
+    %r = shl i64 %a, %b
+    ret i64 %r
+}
+define internal i64 @int_mul(i64 %a, i64 %b) alwaysinline {
+    %r = mul nsw i64 %a, %b
+    ret i64 %r
+}
+define internal i1 @int_nonzero(i64 %x) alwaysinline {
+    %r = icmp ne i64 %x, 0
+    ret i1 %r
+}
+define internal i64 @int_neg(i64 %x) alwaysinline {
+    %r = sub i64 0, %x
+    ret i64 %r
+}
+define i1 @int_lt(i64 %lhs, i64 %rhs)  alwaysinline {
+    %r = icmp slt i64 %lhs, %rhs
+    ret i1 %r
+}
+define internal i1 @int_gt(i64 %lhs, i64 %rhs)  alwaysinline {
+    %r = icmp sgt i64 %lhs, %rhs
+    ret i1 %r
+}
+define internal i1 @int_le(i64 %lhs, i64 %rhs)  alwaysinline {
+    %r = icmp sle i64 %lhs, %rhs
+    ret i1 %r
+}
+define internal i1 @int_ge(i64 %lhs, i64 %rhs)  alwaysinline {
+    %r = icmp sge i64 %lhs, %rhs
+    ret i1 %r
+}
+define i1 @int_eq(i64 %lhs, i64 %rhs)  alwaysinline {
+    %r = icmp eq i64 %lhs, %rhs
+    ret i1 %r
+}
+define internal i1 @int_ne(i64 %lhs, i64 %rhs)  alwaysinline {
+    %r = icmp ne i64 %lhs, %rhs
+    ret i1 %r
+}
+define void @int_incref(i64 %n) alwaysinline alwaysinline {
+    ret void
+}
+define void @int_decref(i64 %n) alwaysinline alwaysinline {
+    ret void
+}
+declare i64 @int_max(i64, i64)
+declare i64 @int_min(i64, i64)
+
+define internal double @float_add(double %a, double %b) alwaysinline {
+    %r = fadd double %a, %b
+    ret double %r
+}
+define internal double @float_sub(double %a, double %b) alwaysinline {
+    %r = fsub double %a, %b
+    ret double %r
+}
+define internal double @float_rsub(double %a, double %b) alwaysinline {
+    %r = fsub double %b, %a
+    ret double %r
+}
+define internal double @float_mul(double %a, double %b) alwaysinline {
+    %r = fmul double %a, %b
+    ret double %r
+}
+define internal double @float_div(double %a, double %b) alwaysinline {
+    %r = fdiv double %a, %b
+    ret double %r
+}
+define internal double @float_rdiv(double %a, double %b) alwaysinline {
+    %r = fdiv double %b, %a
+    ret double %r
+}
+define internal i1 @float_nonzero(double %x) alwaysinline {
+    %r = fcmp one double %x, 0.0
+    ret i1 %r
+}
+define internal double @float_neg(double %x) alwaysinline {
+    %r = fsub double 0.0, %x
+    ret double %r
+}
+define i1 @float_lt(double %lhs, double %rhs)  alwaysinline {
+    %r = fcmp olt double %lhs, %rhs
+    ret i1 %r
+}
+define internal i1 @float_gt(double %lhs, double %rhs)  alwaysinline {
+    %r = fcmp ogt double %lhs, %rhs
+    ret i1 %r
+}
+define internal i1 @float_le(double %lhs, double %rhs)  alwaysinline {
+    %r = fcmp ole double %lhs, %rhs
+    ret i1 %r
+}
+define internal i1 @float_ge(double %lhs, double %rhs)  alwaysinline {
+    %r = fcmp oge double %lhs, %rhs
+    ret i1 %r
+}
+define i1 @float_eq(double %lhs, double %rhs)  alwaysinline {
+    %r = fcmp oeq double %lhs, %rhs
+    ret i1 %r
+}
+define internal i1 @float_ne(double %lhs, double %rhs)  alwaysinline {
+    %r = fcmp one double %lhs, %rhs
+    ret i1 %r
+}
+define void @float_incref(double %n) alwaysinline alwaysinline {
+    ret void
+}
+define void @float_decref(double %n) alwaysinline alwaysinline {
+    ret void
+}
+
+declare noalias %string* @int_repr(i64 %x)
+declare i64 @int_(%string* %s, i64 %base)
+declare i64 @int_abs(i64)
+
+declare noalias %string* @float_str(double %x)
+declare noalias %string* @float_repr(double %x)
+declare double @float_abs(double)
+
+declare double @time_time()
+declare double @time_clock()
+declare void @time_sleep(double)
+
+
+
+
+define i1 @bool_nonzero(i1 %b) alwaysinline {
+    ret i1 %b
+}
+define i1 @bool_eq(i1 %x, i1 %y) alwaysinline {
+    %r = icmp eq i1 %x, %y
+    ret i1 %r
+}
+define void @bool_incref(i1 %b) alwaysinline {
+    ret void
+}
+define void @bool_decref(i1 %b) alwaysinline {
+    ret void
+}
+declare noalias %string* @bool_repr(i1 %b)
+
+
+define void @none_incref(%none* %s) alwaysinline {
+    ret void
+}
+
+define void @none_decref(%none* %s) alwaysinline {
+    ret void
+}
+declare noalias %string* @none_repr(%none* %s)
+declare i1 @none_eq(%none* %lhs, %none* %rhs)
+
+
+
+
+
+; Schema: nrefs, len, ptr to null-terminated buffer, (potentially) the character buffer itself
+%string = type {i64, i64, i8*, [0 x i8]}
+
+declare noalias %list_string* @str_split(%string*, %string*)
+declare noalias %string* @str_join(%string*, %list_string*)
+declare noalias %string* @str_from_const(i8* %buf, i64 %len)
+declare void @str_incref(%string* %self)
+declare void @str_decref(%string* %self)
+declare i64 @str_len(%string* %self)
+declare i1 @str_nonzero(%string* %self)
+declare i8* @str_buf(%string* %self)
+declare %string* @str_strip(%string* %self)
+declare noalias %string* @str_add(%string* %lhs, %string* %rhs)
+declare noalias %string* @str_mul(%string* %lhs, i64 %rhs)
+declare noalias %string* @str_str(%string* %self)
+declare noalias %string* @str_repr(%string* %self)
+declare noalias %string* @str_getitem(%string* %self, i64 %n)
+declare noalias %string* @str_getitem_slice(%string* %self, %slice* %s)
+declare noalias %string* @chr(i64 %n)
+declare i64 @ord(%string* %s)
+declare i1 @str_eq(%string*, %string*)
+declare i1 @str_ne(%string*, %string*)
+declare i1 @str_lt(%string*, %string*)
+declare i1 @str_le(%string*, %string*)
+declare %striterator* @str_iter(%string*)
+declare i1 @striterator_hasnext(%striterator*)
+declare %string* @striterator_next(%striterator*)
+
+; Used as the default arg for open()
+@str_r = internal constant [2 x i8] c"r\00"
+@.str_r = internal constant %string {i64 1, i64 1, i8* getelementptr inbounds ([2 x i8]* @str_r, i64 0, i32 0), [0 x i8] undef}
+
+
+
+; Schema: nrefs, closed, fd
+%file = type {i64, i1, i64}
+
+declare noalias %file* @file_open(%string* nocapture noalias %fname)
+declare noalias %file* @file_open2(%string* nocapture noalias %fname, %string* nocapture noalias %mode)
+declare noalias %string* @file_repr(%file* nocapture noalias)
+declare noalias %file* @file_alloc()
+declare void @file_init(%file* nocapture noalias, %string* nocapture noalias)
+declare void @file_close(%file* nocapture noalias)
+declare noalias %string* @file_read(%file* nocapture noalias %self, i64 %n)
+declare void @file_write(%file* nocapture noalias %self, %string* noalias nocapture)
+declare noalias %string* @file_readline(%file* nocapture noalias %self)
+declare void @file_incref(%file* nocapture noalias %self)
+declare void @file_decref(%file* nocapture noalias %self)
+declare void @file_flush(%file* nocapture noalias %self)
+define %file* @file_enter(%file* %f) {
+    call void @file_incref(%file* %f)
+    ret %file* %f
+}
+define void @file_exit(%file* %f, %none*, %none*, %none*) {
+    ret void
+}
+
+
+declare noalias %list_i64* @range(i64)
+declare noalias %string* @func_repr()
+declare noalias %string* @instance_repr(%type*)
+declare noalias %string* @str_format(%string*, ...)
+
+declare double @sqrt(double)
+declare double @tan(double)
+declare double @ceil(double)
+declare double @cos(double)
+declare double @sin(double)
+define i64 @hax_ftoi(double %d) {
+    %r = fptosi double %d to i64
+    ret i64 %r
+}
+define double @hax_itof(i64 %n) {
+    %r = sitofp i64 %n to double
+    ret double %r
+}
+declare double @float_min(double, double)
+declare double @float_max(double, double)
+
+declare void @check_unpacking_length(i64, i64)
+declare void @assert_(i1)
+
+
+
+declare %slice* @slice_alloc(i64, i64, i64, i64)
+declare void @slice_incref(%slice*)
+declare void @slice_decref(%slice*)
+
+$(make_typeobj(em, "int"))
+$(make_typeobj(em, "float"))
+$(make_typeobj(em, "str"))
+$(make_typeobj(em, "bool"))
+
+declare noalias %string* @type_repr_(%type* %self)
+declare void @type_incref_(%type* %self)
+declare void @type_decref_(%type* %self)
+
+define %underlying* @float_to_ptr(double %d) {
+    %p = alloca double
+    store double %d, double* %p
+    %p2 = bitcast double* %p to %underlying**
+    %r = load %underlying** %p2
+    ret %underlying* %r
+}
+define double @ptr_to_float(%underlying* %u) {
+    %p = alloca double
+    %p2 = bitcast double* %p to %underlying**
+    store %underlying* %u, %underlying** %p2
+    %r = load double* %p
+    ret double %r
+}
+
+define i64 @sum_int($(_IntIterable.llvm_type()) %l) {
+start:
+    $$(i = Variable(_IntIterable, "%l", 1, False).getattr(em, "__iter__").call(em, []))
+    br label %check
+check:
+    %t = phi i64 [0, %start], [%t2, %next]
+    $$(i.incvref(em); b = i.getattr(em, "hasnext").call(em, []))
+    br i1 $(b.v), label %next, label %done
+next:
+    $$(i.incvref(em); v = i.getattr(em, "next").call(em, []))
+    %t2 = add i64 %t, $(v.v)
+    br label %check
+done:
+    $$(i.decvref(em))
+    ret i64 %t
+}
+
+define double @sum_float($(_FloatIterable.llvm_type()) %l) {
+start:
+    $$(i = Variable(_FloatIterable, "%l", 1, False).getattr(em, "__iter__").call(em, []))
+    br label %check
+check:
+    %t = phi double [0.0, %start], [%t2, %next]
+    $$(i.incvref(em); b = i.getattr(em, "hasnext").call(em, []))
+    br i1 $(b.v), label %next, label %done
+next:
+    $$(i.incvref(em); v = i.getattr(em, "next").call(em, []))
+    %t2 = fadd double %t, $(v.v)
+    br label %check
+done:
+    $$(i.decvref(em))
+    ret double %t
+}
+
+define i1 @any($(_BoolableIterable.llvm_type()) %l) {
+start:
+    $$(i = Variable(_BoolableIterable, "%l", 1, False).getattr(em, "__iter__").call(em, []))
+    br label %check
+check:
+    $$(i.incvref(em); b = i.getattr(em, "hasnext").call(em, []))
+    br i1 $(b.v), label %next, label %done
+next:
+    $$$(
+    i.incvref(em)
+    v = i.getattr(em, "next").call(em, [])
+    b = v.getattr(em, "__nonzero__").call(em, [])
+    )$$$
+    br i1 $(b.v), label %yep, label %check
+yep:
+    $$$(
+    i.incvref(em)
+    i.getattr(em, "__decref__").call(em, [])
+    )$$$
+    ret i1 1
+done:
+    $$$(
+    i.incvref(em)
+    i.getattr(em, "__decref__").call(em, [])
+    )$$$
+    ret i1 0
+}

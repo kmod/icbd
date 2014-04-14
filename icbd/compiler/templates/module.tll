@@ -1,0 +1,21 @@
+$(module_obj.v) = global %$(type_name) zeroinitializer
+
+define void @$(module_name)_init() {
+    $$$(
+    module_obj.incvref(em)
+    r = module_obj.getattr(em, UserModuleMT.LOADED_FIELD_NAME)
+    )$$$
+
+    br i1 $(r.v), label %loaded, label %not_loaded
+
+not_loaded:
+    $$$(
+    module_obj.incvref(em)
+    module_obj.setattr(em, UserModuleMT.LOADED_FIELD_NAME, Variable(Bool, "true", 1, False))
+    )$$$
+    call void @$(module_name)_global()
+    ret void
+
+loaded:
+    ret void
+}

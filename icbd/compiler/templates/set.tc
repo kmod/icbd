@@ -1,0 +1,139 @@
+$$(e = et.c_type())
+typedef struct {
+    i64 nrefs;
+    i64 capacity;
+    i64 size;
+    $(e) *elts;
+} $(n);
+
+typedef struct {
+    i64 nrefs;
+    $(n)* set;
+    i64 idx;
+} $(i);
+
+$(n)* $(n)_ctor() {
+    $(n)* rtn = ($(n)*)my_malloc(sizeof($(n)), "$(n)_ctor");
+    rtn->nrefs = 1;
+    rtn->capacity = 10;
+    rtn->size = 0;
+    rtn->elts = ($(e)*)my_malloc(10 * sizeof($(e)), "$(n)_elts");
+    return rtn;
+}
+
+void $(n)_incref($(n)* self) {
+    if (self == NULL)
+        return;
+
+    self->nrefs++;
+}
+
+void $(n)_decref($(n)* self) {
+    if (self == NULL)
+        return;
+
+    self->nrefs--;
+    if (self->nrefs == 0) {
+        int n = self->size;
+        for (int i = 0; i < n; i++) {
+            $(et.decref_c(em, "self->elts[i]"));
+        }
+        my_free((char*)self->elts, "$(n)_elts");
+        my_free((char*)self, "$(n)");
+    } else if (self->nrefs < 0) {
+        raise_over_free_error();
+    }
+}
+
+string* $(n)_repr($(n)* self) {
+    if (self == NULL)
+        return str_from_const("None", 4);
+    return str_from_const("set($(n))", $(5 + len(n)));
+}
+
+i1 $(n)_contains($(n)* self, $(e) elt) {
+    assert(self != NULL);
+    int n = self->size;
+    for (int i = 0; i < n; i++) {
+        $$$(
+        b = Variable(et, "elt", 1, False).getattr(em, "__eq__").call(em, [Variable(et, "self->elts[i]", 1, False)])
+        assert b.v.startswith('%')
+        )$$$
+        if ($(b.v[1:]))
+            return true;
+    }
+    return false;
+}
+
+i64 $(n)_len($(n)* self) {
+    return self->size;
+}
+
+void $(n)_add($(n)* self, $(e) elt) {
+    if ($(n)_contains(self, elt))
+        return;
+
+    if (self->size >= self->capacity) {
+        self->elts = ($(e)*)my_realloc(self->elts, 2 * self->capacity * sizeof($(e)), "$(n)_elts");
+        self->capacity *= 2;
+    }
+
+    self->elts[self->size] = elt;
+    $$$(
+    Variable(et, "elt", 1, False).getattr(em, "__incref__").call(em, [])
+    )$$$
+    self->size++;
+}
+
+i1 $(n)_eq($(n)* lhs, $(n)* rhs) {
+    assert(0 && "Not implemented");
+    return (lhs == rhs);
+}
+
+$(i)* $(n)_iter($(n)* self) {
+    $(i)* rtn = ($(i)*) my_malloc(sizeof($(i)), "$(n)_iter");
+    rtn->nrefs = 1;
+    rtn->set = self;
+    rtn->idx = 0;
+
+    $(n)_incref(self);
+    return rtn;
+}
+
+void $(i)_decref($(i)* self) {
+    if (self == NULL)
+        return;
+
+    self->nrefs--;
+    if (self->nrefs == 0) {
+        $(n)_decref(self->set);
+        my_free((char*)self, "$(n)_iter");
+    } else if (self->nrefs < 0) {
+        raise_over_free_error();
+    }
+}
+
+void $(i)_incref($(i)* self) {
+    if (self == NULL)
+        return;
+    self->nrefs++;
+}
+
+i1 $(i)_hasnext($(i)* self) {
+    return self->idx < self->set->size;
+}
+
+$(e) $(i)_next($(i)* self) {
+    i64 idx = self->idx;
+    if (idx >= self->set->size) {
+        printf("StopIteration\n");
+        exit(-6);
+    }
+    self->idx++;
+    $(e) rtn = self->set->elts[idx];
+    $$$(
+    Variable(et, "rtn", 1, False).getattr(em, "__incref__").call(em, [])
+    )$$$
+    return rtn;
+}
+

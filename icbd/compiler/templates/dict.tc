@@ -1,0 +1,414 @@
+$$(kt = t.key_type)
+$$(k = kt.c_type())
+$$(vt = t.value_type)
+$$(v = vt.c_type())
+$$(n = t.name)
+$$(lvt = ListMT.make_list(vt))
+$$(lv = lvt.c_type())
+$$(it = TupleMT.make_tuple([kt, vt]))
+$$(i = it.c_type())
+$$(lit = ListMT.make_list(it))
+$$(li = lit.c_type())
+$$(kin_ = t.key_iter_type.name)
+$$(vin_ = t.value_iter_type.name)
+$$(iin_ = t.item_iter_type.name)
+
+void $(kt.get_method_name(em, "__incref__"))($(k));
+void $(kt.get_method_name(em, "__decref__"))($(k));
+void $(vt.get_method_name(em, "__incref__"))($(v));
+void $(vt.get_method_name(em, "__decref__"))($(v));
+void $(it.get_method_name(em, "__decref__"))($(it.c_type()));
+$$(key_eq = kt.get_method_name(em, "__eq__"))
+i1 $(key_eq)($(k), $(k));
+
+string* $(kt.get_method_name(em, "__repr__"))($(k));
+string* $(vt.get_method_name(em, "__repr__"))($(v));
+void str_decref(string*);
+
+typedef struct {
+    i64 nrefs;
+    i64 capacity;
+    i64 size;
+    $(k) *keys;
+    $(v) *values;
+} $(n);
+
+typedef struct {
+    i64 nrefs;
+    $(n)* dict;
+    i64 idx;
+} $(kin_);
+
+typedef struct {
+    i64 nrefs;
+    $(n)* dict;
+    i64 idx;
+} $(vin_);
+
+typedef struct {
+    i64 nrefs;
+    $(n)* dict;
+    i64 idx;
+} $(iin_);
+
+$(n)* $(n)_ctor() {
+    $(n)* rtn = ($(n)*)my_malloc(sizeof($(n)), "$(n)_ctor");
+    rtn->nrefs = 1;
+    rtn->capacity = 10;
+    rtn->size = 0;
+    rtn->keys = ($(k)*)my_malloc(10 * sizeof($(k)), "$(n)_keys");
+    rtn->values = ($(v)*)my_malloc(10 * sizeof($(v)), "$(n)_values");
+    return rtn;
+}
+
+void $(n)_incref($(n)* self) {
+    if (self == NULL)
+        return;
+
+    self->nrefs++;
+}
+
+void $(n)_decref($(n)* self) {
+    if (self == NULL)
+        return;
+
+    self->nrefs--;
+    if (self->nrefs == 0) {
+        int n = self->size;
+        for (int i = 0; i < n; i++) {
+            $(kt.decref_c(em, "self->keys[i]"));
+            $(vt.decref_c(em, "self->values[i]"));
+        }
+        my_free((char*)self->keys, "$(n)_keys");
+        my_free((char*)self->values, "$(n)_values");
+        my_free((char*)self, "$(n)");
+    } else if (self->nrefs < 0) {
+        raise_over_free_error();
+    }
+}
+
+void $(n)_set($(n)* self, $(k) key, $(v) value);
+
+$(v if vt is not None_ else "void") $(n)_get($(n)* self, $(k) key, $(v) def) {
+    // TODO: too much duplication with _getitem
+    int n = self->size;
+    for (int i = 0; i < n; i++) {
+        if ($(key_eq)(self->keys[i], key)) {
+            $(v) rtn = self->values[i];
+            $(vt.get_method_name(em, "__incref__"))(rtn);
+            return $("rtn" if vt is not None_ else "");
+        }
+    }
+
+    $$$(
+    Variable(vt, "def", 1, False).getattr(em, "__incref__").call(em, [])
+    )$$$
+
+    $("return def;" if vt is not None_ else "")
+}
+
+$(v if vt is not None_ else "void") $(n)_setdefault($(n)* self, $(k) key, $(v) def) {
+    // TODO: too much duplication with _get
+    int n = self->size;
+    for (int i = 0; i < n; i++) {
+        if ($(key_eq)(self->keys[i], key)) {
+            $(v) rtn = self->values[i];
+            $(vt.get_method_name(em, "__incref__"))(rtn);
+            return $("rtn" if vt is not None_ else "");
+        }
+    }
+
+    $(n)_set(self, key, def);
+    $$$(
+    Variable(vt, "def", 1, False).getattr(em, "__incref__").call(em, [])
+    )$$$
+    $("return def;" if vt is not None_ else "")
+}
+
+$(v if vt is not None_ else "void") $(n)_getitem($(n)* self, $(k) key) {
+    int n = self->size;
+    for (int i = 0; i < n; i++) {
+        if ($(key_eq)(self->keys[i], key)) {
+            $(v) rtn = self->values[i];
+            $(vt.get_method_name(em, "__incref__"))(rtn);
+            return $("rtn" if vt is not None_ else "");
+        }
+    }
+    string* s = $(kt.get_method_name(em, "__repr__"))(key);
+    printf("KeyError: %.*s\n", (int)s->len, s->buf);
+    str_decref(s);
+    exit(-5);
+}
+
+void $(n)_set($(n)* self, $(k) key, $(v) value) {
+    int n = self->size;
+    if (n >= self->capacity) {
+        self->keys = ($(k)*)my_realloc(self->keys, 2 * self->capacity * sizeof($(k)), "$(n)_keys");
+        self->values = ($(v)*)my_realloc(self->values, 2 * self->capacity * sizeof($(v)), "$(n)_values");
+        self->capacity *= 2;
+    }
+    $(kt.get_method_name(em, "__incref__"))(key);
+    $(vt.get_method_name(em, "__incref__"))(value);
+
+    for (int i = 0; i < n; i++) {
+        if ($(key_eq)(self->keys[i], key)) {
+            // TODO it could be more efficient to just keep the old version in there, but I think
+            // always replacing the key is the right thing to do?
+            $(kt.get_method_name(em, "__decref__"))(self->keys[i]);
+            $(vt.get_method_name(em, "__decref__"))(self->values[i]);
+            self->keys[i] = key;
+            self->values[i] = value;
+            return;
+        }
+    }
+    self->keys[n] = key;
+    self->values[n] = value;
+    self->size++;
+}
+
+i64 $(n)_len($(n)* self) {
+    return self->size;
+}
+
+i1 $(n)_eq($(n)* lhs, $(n)* rhs) {
+    assert(0 && "Not implemented");
+}
+
+i1 $(n)_nonzero($(n)* self) {
+    return (self->size > 0);
+}
+
+i1 $(n)_contains($(n)* self, $(k) k) {
+    int n = self->size;
+    for (int i = 0; i < n; i++) {
+        $$$(
+        b = Variable(kt, "k", 1, False).getattr(em, "__eq__").call(em, [Variable(kt, "self->keys[i]", 1, False)])
+        assert b.v.startswith('%')
+        )$$$
+        if ($(b.v[1:]))
+            return true;
+    }
+    return false;
+}
+
+string* $(n)_repr($(n)* self) {
+    if (self == NULL)
+        return str_from_const("None", 4);
+
+    int nwritten = 0;
+    int buflen = 40;
+    string* rtn = (string*)my_malloc(buflen + sizeof(string), "$(n)_repr");
+    rtn->nrefs = 1;
+    rtn->len = 0;
+
+    char* out_ptr = &(rtn->buf[0]);
+    *out_ptr = '{';
+    out_ptr++;
+    nwritten++;
+
+#define max(a, b) ((a)>(b)?(a):(b))
+#define ENSURE(n) if (nwritten > buflen - (n)) {\
+    buflen = max(buflen * 2, nwritten + (n)); \
+    rtn = (string*)my_realloc((char*)rtn, sizeof(string) + buflen, "$(n)_ensure");\
+    out_ptr = &rtn->buf[nwritten]; \
+    }
+
+    i64 n = self->size;
+    for (int i = 0; i < n; i++) {
+        if (i > 0) {
+            ENSURE(2);
+            *(out_ptr++) = ',';
+            *(out_ptr++) = ' ';
+            nwritten += 2;
+        }
+        string* k = $(kt.get_method_name(em, "__repr__"))(self->keys[i]);
+        string* v = $(vt.get_method_name(em, "__repr__"))(self->values[i]);
+        ENSURE(2 + k->len + v->len);
+
+        memcpy(out_ptr, k->ptr, k->len);
+        out_ptr += k->len;
+        nwritten += k->len;
+
+        *(out_ptr++) = ':';
+        *(out_ptr++) = ' ';
+        nwritten += 2;
+
+        memcpy(out_ptr, v->ptr, v->len);
+        out_ptr += v->len;
+        nwritten += v->len;
+
+        str_decref(k);
+        str_decref(v);
+    }
+    ENSURE(1);
+    *(out_ptr++) = '}';
+    nwritten++;
+    assert(&(rtn->buf[nwritten]) == out_ptr);
+    rtn->ptr = &(rtn->buf[0]);
+    rtn->len = nwritten;
+    return rtn;
+
+#undef ENSURE
+#undef max
+}
+
+$(lv) $(n)_values($(n)* self) {
+    $(lv) rtn = $(lvt.get_ctor_name()[1:])(); /// strip off the @
+    for (int i = 0; i < self->size; i++) {
+        $(lvt.name)_append(rtn, self->values[i]);
+    }
+    return rtn;
+}
+
+$(li) $(n)_items($(n)* self) {
+    $(li) rtn = $(lit.get_ctor_name()[1:])(); /// strip off the @
+    for (int i = 0; i < self->size; i++) {
+        $(i) t = $(it.get_ctor_name()[1:])(self->keys[i], self->values[i]); /// strip off the @
+        $(lit.name)_append(rtn, t);
+        $(it.get_method_name(em, "__decref__"))(t);
+    }
+    return rtn;
+}
+
+///
+// Key iterators
+
+$(kin_)* $(n)_iter($(n)* self) {
+    $(kin_)* rtn = ($(kin_)*) my_malloc(sizeof($(kin_)), "$(n)_iter");
+    rtn->nrefs = 1;
+    rtn->dict = self;
+    rtn->idx = 0;
+
+    $(n)_incref(self);
+    return rtn;
+}
+
+void $(kin_)_decref($(kin_)* self) {
+    if (self == NULL)
+        return;
+
+    self->nrefs--;
+    if (self->nrefs == 0) {
+        $(n)_decref(self->dict);
+        my_free((char*)self, "$(n)_iter");
+    } else if (self->nrefs < 0) {
+        raise_over_free_error();
+    }
+}
+
+void $(kin_)_incref($(kin_)* self) {
+    if (self == NULL)
+        return;
+    self->nrefs++;
+}
+
+i1 $(kin_)_hasnext($(kin_)* self) {
+    return self->idx < self->dict->size;
+}
+
+$(k) $(kin_)_next($(kin_)* self) {
+    i64 idx = self->idx;
+    if (idx >= self->dict->size) {
+        printf("StopIteration\n");
+        exit(-6);
+    }
+    self->idx++;
+    $(k) rtn = self->dict->keys[idx];
+    $(kt.get_method_name(em, "__incref__"))(rtn);
+    return rtn;
+}
+
+///
+// Value iterators
+
+$(vin_)* $(n)_itervalues($(n)* self) {
+    $(vin_)* rtn = ($(vin_)*) my_malloc(sizeof($(vin_)), "$(n)_itervalues");
+    rtn->nrefs = 1;
+    rtn->dict = self;
+    rtn->idx = 0;
+
+    $(n)_incref(self);
+    return rtn;
+}
+
+void $(vin_)_decref($(vin_)* self) {
+    if (self == NULL)
+        return;
+
+    self->nrefs--;
+    if (self->nrefs == 0) {
+        $(n)_decref(self->dict);
+        my_free((char*)self, "$(n)_itervalues");
+    } else if (self->nrefs < 0) {
+        raise_over_free_error();
+    }
+}
+
+void $(vin_)_incref($(vin_)* self) {
+    if (self == NULL)
+        return;
+    self->nrefs++;
+}
+
+i1 $(vin_)_hasnext($(vin_)* self) {
+    return self->idx < self->dict->size;
+}
+
+$(v) $(vin_)_next($(vin_)* self) {
+    i64 idx = self->idx;
+    if (idx >= self->dict->size) {
+        printf("StopIteration\n");
+        exit(-6);
+    }
+    self->idx++;
+    $(v) rtn = self->dict->values[idx];
+    $(vt.get_method_name(em, "__incref__"))(rtn);
+    return rtn;
+}
+
+///
+// Item iterators
+
+$(iin_)* $(n)_iteritems($(n)* self) {
+    $(iin_)* rtn = ($(iin_)*) my_malloc(sizeof($(iin_)), "$(n)_iteritems");
+    rtn->nrefs = 1;
+    rtn->dict = self;
+    rtn->idx = 0;
+
+    $(n)_incref(self);
+    return rtn;
+}
+
+void $(iin_)_decref($(iin_)* self) {
+    if (self == NULL)
+        return;
+
+    self->nrefs--;
+    if (self->nrefs == 0) {
+        $(n)_decref(self->dict);
+        my_free((char*)self, "$(n)_iteritems");
+    } else if (self->nrefs < 0) {
+        raise_over_free_error();
+    }
+}
+
+void $(iin_)_incref($(iin_)* self) {
+    if (self == NULL)
+        return;
+    self->nrefs++;
+}
+
+i1 $(iin_)_hasnext($(iin_)* self) {
+    return self->idx < self->dict->size;
+}
+
+$(i) $(iin_)_next($(iin_)* self) {
+    i64 idx = self->idx;
+    if (idx >= self->dict->size) {
+        printf("StopIteration\n");
+        exit(-6);
+    }
+    self->idx++;
+    $(i) rtn = $(it.get_ctor_name()[1:])(self->dict->keys[idx], self->dict->values[idx]);
+    return rtn;
+}

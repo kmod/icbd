@@ -1,0 +1,430 @@
+; Schema is: nrefs, capacity, size, ptr-to-array
+%$(n) = type {i64, i64, i64, $(e)*}
+$(make_typeobj(em, n))
+$(make_typeobj(em, in_))
+; nrefs, position, ptr-to-list
+%$(in_) = type {i64, i64, %$(n)*}
+
+declare i1 @$(n)_eq(%$(n)*, %$(n)*)
+declare i1 @$(n)_nonzero(%$(n)*)
+declare void @$(n)_insert(%$(n)*, i64, $(e))
+declare void @$(n)_setitem_slice(%$(n)*, %slice*, %$(n)*)
+declare $(e) @$(n)_pop(%$(n)*, i64)
+declare i1 @$(n)_contains(%$(n)*, $(e))
+declare void @$(n)_reverse(%$(n)*)
+declare void @$(n)_sort(%$(n)*)
+
+define %$(n)* @$(n)_ctor() {
+    %sizeof_p = getelementptr %$(n)* null, i64 1
+    %sizeof = ptrtoint %$(n)* %sizeof_p to i64
+    %list_alloc = call noalias i8* @my_malloc(i64 %sizeof, i8* $(alloc_name))
+    %rtn = bitcast i8* %list_alloc to %$(n)*
+
+    %array_sz_p = getelementptr $(e)* null, i64 $(initial_size)
+    %array_sz = ptrtoint $(e)* %array_sz_p to i64
+    %array_alloc = call noalias i8* @my_malloc(i64 %array_sz, i8* $(alloc_name))
+    %array = bitcast i8* %array_alloc to $(e)*
+
+    %ref_ptr = getelementptr inbounds %$(n)* %rtn, i64 0, i32 0
+    %allocd_ptr = getelementptr inbounds %$(n)* %rtn, i64 0, i32 1
+    %sz_ptr = getelementptr inbounds %$(n)* %rtn, i64 0, i32 2
+    %array_ptr = getelementptr inbounds %$(n)* %rtn, i64 0, i32 3
+
+    store i64 1, i64* %ref_ptr
+    store i64 $(initial_size), i64* %allocd_ptr
+    store i64 0, i64* %sz_ptr
+    store $(e)* %array, $(e)** %array_ptr
+
+    ret %$(n)* %rtn
+}
+
+define void @$(n)_append(%$(n)* %self, $(e) %elt) {
+start:
+    %ref_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 0
+    %allocd_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 1
+    %sz_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 2
+    %array_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 3
+
+    %allocd = load i64* %allocd_ptr
+    %sz = load i64* %sz_ptr
+    %array = load $(e)** %array_ptr
+
+    %need_realloc = icmp sge i64 %sz, %allocd
+    br i1 %need_realloc, label %realloc, label %push
+realloc:
+    %new_alloc_sz = mul i64 2, %allocd
+    %array_sz_p = getelementptr $(e)* null, i64 %new_alloc_sz
+    %array_sz = ptrtoint $(e)* %array_sz_p to i64
+    %array_cast = bitcast $(e)* %array to i8*
+    %array_realloc = call i8* @my_realloc(i8* nocapture %array_cast, i64 %array_sz, i8* $(alloc_name))
+    %new_array = bitcast i8* %array_realloc to $(e)*
+
+    store $(e)* %new_array, $(e)** %array_ptr
+    store i64 %new_alloc_sz, i64* %allocd_ptr
+    br label %push
+push:
+    %use_array = phi $(e)* [%array, %start], [%new_array, %realloc]
+
+    %elt_ptr = getelementptr inbounds $(e)* %use_array, i64 %sz
+    store $(e) %elt, $(e)* %elt_ptr
+    %new_sz = add i64 %sz, 1
+    store i64 %new_sz, i64* %sz_ptr
+    $(elt_incref)
+    ret void
+}
+
+define $(e) @$(n)_getitem(%$(n)* %self, i64 %idx) {
+start:
+    %ref_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 0
+    %allocd_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 1
+    %sz_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 2
+    %array_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 3
+
+    %sz = load i64* %sz_ptr
+    %neg = icmp slt i64 %idx, 0
+    br i1 %neg, label %negative, label %converted
+negative:
+    %new_idx = add i64 %sz, %idx
+    br label %converted
+converted:
+    %conv_idx = phi i64 [%idx, %start], [%new_idx, %negative]
+    ; begin cut to take out bounds checking
+    %is_neg = icmp slt i64 %conv_idx, 0
+    br i1 %is_neg, label %err, label %nonneg
+nonneg:
+    %overflows = icmp sge i64 %conv_idx, %sz
+    br i1 %overflows, label %err, label %goodidx
+goodidx:
+    ; end cut to take out bounds checking
+    %array = load $(e)** %array_ptr
+    %elt_ptr = getelementptr inbounds $(e)* %array, i64 %conv_idx
+    %elt = load $(e)* %elt_ptr
+    $(elt_incref)
+    ret $(e) %elt
+err:
+    call void @raise_index_error(i64 %idx) noreturn
+    unreachable
+}
+
+declare %$(n)* @$(n)_getitem_slice(%$(n)* %self, %slice* %sl)
+
+define i64 @$(n)_len(%$(n)* %self) {
+start:
+    %ref_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 0
+    %allocd_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 1
+    %sz_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 2
+    %array_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 3
+
+    %sz = load i64* %sz_ptr
+    ret i64 %sz
+}
+
+define i64 @$(n)_nrefs(%$(n)* %self) {
+start:
+    %ref_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 0
+    %allocd_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 1
+    %sz_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 2
+    %array_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 3
+
+    %nrefs = load i64* %ref_ptr
+    ret i64 %nrefs
+}
+
+define void @$(n)_setitem(%$(n)* %self, i64 %idx, $(e) %elt) {
+; TODO: copied from _get
+start:
+    %ref_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 0
+    %allocd_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 1
+    %sz_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 2
+    %array_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 3
+
+    %sz = load i64* %sz_ptr
+    %neg = icmp slt i64 %idx, 0
+    br i1 %neg, label %negative, label %converted
+negative:
+    %new_idx = add i64 %sz, %idx
+    br label %converted
+converted:
+    %conv_idx = phi i64 [%idx, %start], [%new_idx, %negative]
+    ; begin cut to take out bounds checking
+    %is_neg = icmp slt i64 %conv_idx, 0
+    br i1 %is_neg, label %err, label %nonneg
+nonneg:
+    %overflows = icmp sge i64 %conv_idx, %sz
+    br i1 %overflows, label %err, label %goodidx
+goodidx:
+    ; end cut to take out bounds checking
+    %array = load $(e)** %array_ptr
+    %elt_ptr = getelementptr inbounds $(e)* %array, i64 %conv_idx
+    %gone_elt = load $(e)* %elt_ptr
+    $(elt_decref)
+    store $(e) %elt, $(e)* %elt_ptr
+    $(elt_incref)
+    ret void
+err:
+    call void @raise_index_error(i64 %idx) noreturn
+    unreachable
+}
+
+define i64 @$(n)_chref(%$(n)* %self, i64 %inc) {
+    %ref_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 0
+    %nrefs = load i64* %ref_ptr
+    %new_refs = add i64 %nrefs, %inc
+    store i64 %new_refs, i64* %ref_ptr
+    ret i64 %new_refs
+}
+
+define void @$(n)_incref(%$(n)* %self) {
+    %isnull = icmp eq %$(n)* %self, null
+    br i1 %isnull, label %ifnull, label %ifnotnull
+ifnull:
+    ret void
+
+ifnotnull:
+    %refs = call i64 @$(n)_chref(%$(n)* %self, i64 1)
+    ret void
+}
+
+define void @$(n)_decref(%$(n)* %self) {
+    %isnull = icmp eq %$(n)* %self, null
+    br i1 %isnull, label %ifnull, label %ifnotnull
+ifnull:
+    ret void
+
+ifnotnull:
+    %refs = call i64 @$(n)_chref(%$(n)* %self, i64 -1)
+    %unused = icmp sle i64 %refs, 0
+    br i1 %unused, label %dealloc, label %done
+dealloc:
+    %bad = icmp slt i64 %refs, 0
+    $(DEBUG_CHECKS) br i1 %bad, label %err, label %do_free
+    $(NO_DEBUG_CHECKS) br label %do_free
+do_free:
+    %array_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 3
+    %array = load $(e)** %array_ptr
+    %sz_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 2
+    %sz = load i64* %sz_ptr
+    br label %free_loop_outer
+free_loop_outer:
+    ; TODO weaken this?  just increment a pointer SZ times?
+    %idx = phi i64 [0, %do_free], [%nidx, %free_loop]
+    %cont = icmp slt i64 %idx, %sz
+    br i1 %cont, label %free_loop, label %done_free_loop
+free_loop:
+    %elt_ptr = getelementptr inbounds $(e)* %array, i64 %idx
+    %gone_elt = load $(e)* %elt_ptr
+    $(elt_decref)
+    %nidx = add nsw i64 %idx, 1
+    br label %free_loop_outer
+done_free_loop:
+    %array_cast = bitcast $(e)* %array to i8*
+    call void @my_free(i8* nocapture %array_cast, i8* $(alloc_name))
+    %list_cast = bitcast %$(n)* %self to i8*
+    call void @my_free(i8* nocapture %list_cast, i8* $(alloc_name))
+    br label %done
+err:
+    call void @raise_over_free_error() noreturn
+    unreachable
+done:
+    ret void
+}
+
+define void @$(n)_extend(%$(n)* %self, %$(n)* %rhs) {
+func_start:
+    %sz_ptr = getelementptr inbounds %$(n)* %rhs, i64 0, i32 2
+    %sz = load i64* %sz_ptr
+
+    %array_ptr = getelementptr inbounds %$(n)* %rhs, i64 0, i32 3
+    %array = load $(e)** %array_ptr
+    br label %test
+
+test:
+    %n = phi i64 [0, %func_start], [%next_n, %loop]
+    %is_done = icmp sge i64 %n, %sz
+    br i1 %is_done, label %exit, label %loop
+
+loop:
+    %elt_ptr = getelementptr inbounds $(e)* %array, i64 %n
+    %elt = load $(e)* %elt_ptr
+    call void @$(n)_append(%$(n)* %self, $(e) %elt)
+    %next_n = add i64 %n, 1
+    br label %test
+
+exit:
+    ret void
+}
+
+define %$(n)* @$(n)_iadd(%$(n)* %self, %$(n)* %rhs) {
+    call void @$(n)_extend(%$(n)* %self, %$(n)* %rhs)
+    call void @$(n)_incref(%$(n)* %self)
+    ret %$(n)* %self
+}
+
+define %$(n)* @$(n)_add(%$(n)* %self, %$(n)* %rhs) {
+    %rtn = call %$(n)* @$(n)_ctor()
+    call void @$(n)_extend(%$(n)* %rtn, %$(n)* %self)
+    call void @$(n)_extend(%$(n)* %rtn, %$(n)* %rhs)
+    ret %$(n)* %rtn
+}
+
+define %$(n)* @$(n)_mul(%$(n)* %self, i64 %n) {
+func_start:
+    %rtn = call %$(n)* @$(n)_ctor()
+    br label %test
+
+test:
+    %iter = phi i64 [%n, %func_start], [%next_iter, %loop]
+    %done = icmp sle i64 %iter, 0
+    br i1 %done, label %func_end, label %loop
+
+loop:
+    ; Maybe not the most efficient in this case:
+    call void @$(n)_extend(%$(n)* %rtn, %$(n)* %self)
+    %next_iter = sub i64 %iter, 1
+    br label %test
+
+func_end:
+    ret %$(n)* %rtn
+}
+
+define %string* @$(n)_repr(%$(n)* %self) {
+    %isnull = icmp eq %$(n)* %self, null
+    br i1 %isnull, label %ifnull, label %func_start
+ifnull:
+    %r = call %string* @none_repr(%none* null)
+    ret %string* %r
+
+func_start:
+    %open = call %string* @str_from_const(i8* getelementptr inbounds ([2 x i8]* @str_open_bracket, i64 0, i32 0), i64 1)
+    %comma = call %string* @str_from_const(i8* getelementptr inbounds ([3 x i8]* @str_comma_space, i64 0, i32 0), i64 2)
+    %end_bracket = call %string* @str_from_const(i8* getelementptr inbounds ([2 x i8]* @str_close_bracket, i64 0, i32 0), i64 1)
+    %empty = call %string* @str_from_const(i8* null, i64 0)
+
+    %list = call %list_string* @list_string_ctor()
+    call void @list_string_append(%list_string* %list, %string* %open)
+
+    %sz_ptr = getelementptr inbounds %$(n)* %self, i64 0, i32 2
+    %sz = load i64* %sz_ptr
+    br label %loop
+
+loop:
+    %idx = phi i64 [0, %func_start], [%nidx, %add_str]
+    %need_comma = phi i1 [0, %func_start], [1, %add_str]
+
+    %isdone = icmp sge i64 %idx, %sz
+    br i1 %isdone, label %done, label %loop_body
+
+loop_body:
+    br i1 %need_comma, label %do_comma, label %add_str
+
+do_comma:
+    call void @list_string_append(%list_string* %list, %string* %comma)
+    br label %add_str
+
+add_str:
+    ; maybe could do this more efficiently because we know that it's in-bounds
+    ; hax: call this gone_elt because that's what the elt_decref string expects
+    %gone_elt = call $(e) @$(n)_getitem(%$(n)* %self, i64 %idx)
+    $(elt_repr)
+    $(elt_decref)
+    call void @list_string_append(%list_string* %list, %string* $(repr_r))
+    call void @str_decref(%string* $(repr_r))
+    %nidx = add i64 %idx, 1
+    br label %loop
+
+done:
+    call void @list_string_append(%list_string* %list, %string* %end_bracket)
+    %rtn = call %string* @str_join(%string* %empty, %list_string* %list)
+    call void @str_decref(%string* %open)
+    call void @str_decref(%string* %comma)
+    call void @str_decref(%string* %end_bracket)
+    call void @str_decref(%string* %empty)
+    call void @list_string_decref(%list_string* %list)
+    ret %string* %rtn
+}
+
+
+
+
+
+define %$(in_)* @$(n)_iter(%$(n)* %self) {
+    %sizeof_p = getelementptr %$(in_)* null, i64 1
+    %sizeof = ptrtoint %$(in_)* %sizeof_p to i64
+    %list_alloc = call noalias i8* @my_malloc(i64 %sizeof, i8* $(alloc_name))
+    %rtn = bitcast i8* %list_alloc to %$(in_)*
+
+    %ref_ptr = getelementptr inbounds %$(in_)* %rtn, i64 0, i32 0
+    %pos_ptr = getelementptr inbounds %$(in_)* %rtn, i64 0, i32 1
+    %list_ptr = getelementptr inbounds %$(in_)* %rtn, i64 0, i32 2
+
+    store i64 1, i64* %ref_ptr
+    store i64 0, i64* %pos_ptr
+    store %$(n)* %self, %$(n)** %list_ptr
+
+    call void @$(n)_incref(%$(n)* %self)
+
+    ret %$(in_)* %rtn
+}
+
+define i64 @$(in_)_chref(%$(in_)* %self, i64 %inc) {
+    %ref_ptr = getelementptr inbounds %$(in_)* %self, i64 0, i32 0
+    %nrefs = load i64* %ref_ptr
+    %new_refs = add i64 %nrefs, %inc
+    store i64 %new_refs, i64* %ref_ptr
+    ret i64 %new_refs
+}
+
+define void @$(in_)_incref(%$(in_)* %self) {
+    %refs = call i64 @$(in_)_chref(%$(in_)* %self, i64 1)
+    ret void
+}
+
+define void @$(in_)_decref(%$(in_)* %self) alwaysinline {
+    %refs = call i64 @$(in_)_chref(%$(in_)* %self, i64 -1)
+    %unused = icmp sle i64 %refs, 0
+    br i1 %unused, label %dealloc, label %done
+dealloc:
+    %bad = icmp slt i64 %refs, 0
+    $(DEBUG_CHECKS) br i1 %bad, label %err, label %do_free
+    $(NO_DEBUG_CHECKS) br label %do_free
+do_free:
+    %list_ptr = getelementptr inbounds %$(in_)* %self, i64 0, i32 2
+    %list = load %$(n)** %list_ptr
+    call void @$(n)_decref(%$(n)* %list)
+
+    %cast = bitcast %$(in_)* %self to i8*
+    call void @my_free(i8* nocapture %cast, i8* $(alloc_name))
+    br label %done
+err:
+    call void @raise_over_free_error() noreturn
+    unreachable
+done:
+    ret void
+}
+
+define i1 @$(in_)_hasnext(%$(in_)* %self) {
+    %pos_ptr = getelementptr inbounds %$(in_)* %self, i64 0, i32 1
+    %list_ptr = getelementptr inbounds %$(in_)* %self, i64 0, i32 2
+
+    %pos = load i64* %pos_ptr
+    %list = load %$(n)** %list_ptr
+
+    %len = call i64 @$(n)_len(%$(n)* %list)
+    %hasnext = icmp slt i64 %pos, %len
+    ret i1 %hasnext
+}
+
+define $(e) @$(in_)_next(%$(in_)* %self) {
+    %pos_ptr = getelementptr inbounds %$(in_)* %self, i64 0, i32 1
+    %list_ptr = getelementptr inbounds %$(in_)* %self, i64 0, i32 2
+
+    %pos = load i64* %pos_ptr
+    %list = load %$(n)** %list_ptr
+
+    %rtn = call $(e) @$(n)_getitem(%$(n)* %list, i64 %pos)
+
+    %new_pos = add i64 %pos, 1
+    store i64 %new_pos, i64* %pos_ptr
+
+    ret $(e) %rtn
+}

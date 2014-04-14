@@ -1,0 +1,15 @@
+$$(c = callable_type.c_type())
+$$(l = list_type.c_type())
+$$(a = accum_type.c_type())
+
+i64 $(list_type.get_method_name(em, "__len__"))($(l));
+$(a) $(callable_type.name)_call2($(c), $(a), $(elt_type.c_type()));
+
+$(a) $(name)($(c) c, $(l) l, $(a) initial) {
+    i64 n = $(list_type.name)_len(l);
+    for (int i = 0; i < n; i++) {
+        $(elt_type.c_type()) e = $(list_type.name)_getitem(l, i);
+        initial = $(callable_type.name)_call2(c, initial, e);
+    }
+    return initial;
+}

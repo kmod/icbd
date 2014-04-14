@@ -1,0 +1,2 @@
+class Formatter(object):
+    pass

@@ -1,0 +1,65 @@
+$$(b = bt.llvm_type())
+$$(o = ot.llvm_type())
+
+define $(b) $(converter_name)($(o) %orig) {
+    $(if ot not in (Int, Float, Bool))
+    %isnull = icmp eq $(o) %orig, null
+    br i1 %isnull, label %ifnull, label %ifnotnull
+    ifnull:
+    ret $(b) null
+
+    ifnotnull:
+    $(endif)
+
+    $$(name = bt._struct.alloc(em))
+
+    $$$(
+    var = Variable(ot, "%orig", 1, False)
+    var.incvref(em)
+    var.getattr(em, "__incref__").call(em, [])
+
+    if var.t is Float:
+        em.pl("%%u = call %%underlying* @float_to_ptr(double %s)" % (var.v,))
+    else:
+        llvm_cmd = "bitcast"
+        if var.t is Int or var.t is Bool:
+            llvm_cmd = "inttoptr"
+        em.pl("%%u = %s %s %s to %%underlying*" % (llvm_cmd, var.t.llvm_type(), var.v))
+
+    bt._struct.set(em, name, BoxedMT.UNDERLYING_FIELD_NAME, Variable(Underlying, "%u", 1, False), skip_decref_prev=True, skip_incref=True)
+
+    for attr_name, (t, ss, st) in bt.attrs.iteritems():
+        if ss == BoxedMT.StorageStrategy.CONST_METHOD:
+            im = var.t.getattr(em, var, attr_name, clsonly=True)
+            f = im.v[1]
+            assert isinstance(f.t, UnboxedFunctionMT), f.t
+            assert not f.t.closure_type, f.t.closure_type
+            method_name = f.v[0]
+
+            orig_func_ptr_type = f.t.llvm_type()
+            # new_func_ptr_type = UnboxedFunctionMT(em, f.t.closure_type, [Underlying] + f.t.arg_types[1:], f.t.rtn_type).llvm_type()
+            new_func_ptr_type = st.llvm_type()
+            # func_ptr_type = "%s (%s)" % (f.t.rtn_type.llvm_type(), ", ".join(["%underlying*"] + [a.llvm_type() for a in f.t.arg_types[1:]]))
+            bitcast_name = "%" + em.mkname()
+            em.pl("%s = bitcast %s %s to %s" % (bitcast_name, orig_func_ptr_type, method_name, new_func_ptr_type))
+            im.decvref(em)
+
+            val_to_store = bitcast_name
+        elif ss == BoxedMT.StorageStrategy.VALUE:
+            var.incvref(em)
+            a = var.getattr(em, attr_name)
+            a = a.convert_to(em, st)
+            val_to_store = a.v
+        elif ss == BoxedMT.StorageStrategy.PTR:
+            var.incvref(em)
+            a_ptr = var.getattrptr(em, attr_name)
+            assert a_ptr.t.referent_type is t, a_ptr.t.referent_type
+            val_to_store = a_ptr.v
+        else:
+            raise Exception(ss)
+        bt._struct.set(em, name, attr_name, Variable(st, val_to_store, 1, False), skip_decref_prev=True, skip_incref=True)
+
+    )$$$
+    ret $(b) $(name)
+}
+

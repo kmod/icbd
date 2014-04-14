@@ -1,0 +1,196 @@
+$$(e = et.c_type())
+$("/*" if et in (Int, Str) else "")
+typedef struct{
+    i64 nrefs;
+    i64 capacity;
+    i64 size;
+    $(e)* ptr;
+} $(n);
+
+void $(n)_append($(n)*, $(e));
+$("*/" if et in (Int, Str) else "")
+$(n)* $(n)_ctor();
+void $(et.get_method_name(em, "__decref__"))($(e));
+void $(et.get_method_name(em, "__incref__"))($(e));
+$(e) $(n)_getitem($(n)*, i64);
+
+$(n)* $(n)_getitem_slice($(n)* self, slice* s) {
+    $(n)* rtn = $(n)_ctor();
+    i64 sz = self->size;
+
+    slice_iterator it;
+    parse_slice(s, sz, &it);
+
+    //printf("%lld %lld %lld %lld\n", s->flags, s->start, s->end, s->step);
+    //printf("%lld %lld %lld\n", cur, end, step);
+    while (true) {
+        i64 cur = sliceit_get_next(&it);
+        if (cur == -1)
+            break;
+
+        assert(0 <= cur);
+        assert(cur < sz);
+
+        $(n)_append(rtn, self->ptr[cur]);
+    }
+    return rtn;
+}
+
+$$(if et.hasattr("__eq__"))
+i1 $(et.get_method_name(em, "__eq__"))($(et.c_type()), $(et.c_type()));
+i1 $(n)_eq($(n)* lhs, $(n)* rhs) {
+    if (lhs == NULL)
+        return rhs == NULL;
+    if (rhs == NULL)
+        return false;
+
+    if (lhs->size != rhs->size)
+        return false;
+
+    for (int i = 0; i < lhs->size; i++) {
+        if (!$(et.get_method_name(em, "__eq__"))(lhs->ptr[i], rhs->ptr[i]))
+            return false;
+    }
+
+    return true;
+}
+
+i1 $(n)_contains($(n)* self, $(e) elt) {
+    int n = self->size;
+    for (int i = 0; i < n; i++) {
+        $$$(
+        b = Variable(et, "elt", 1, False).getattr(em, "__eq__").call(em, [Variable(et, "self->ptr[i]", 1, False)])
+        assert b.v.startswith('%')
+        )$$$
+        if ($(b.v[1:]))
+            return true;
+    }
+    return false;
+}
+$$(endif)
+
+$(e) $(n)_pop($(n)* self, i64 idx) {
+    i64 sz = self->size;
+    if (idx >= sz || idx < -sz)
+        raise_index_error(idx);
+    if (idx < 0)
+        idx = sz + idx;
+    assert(idx >= 0 && idx < sz);
+
+    $(e) rtn = self->ptr[idx];
+    for (int i = idx; i < sz-1; i++) {
+        self->ptr[i] = self->ptr[i+1];
+    }
+    self->size--;
+    return rtn;
+}
+
+void $(n)_insert($(n)* self, i64 idx, $(e) elt) {
+    i64 sz = self->size;
+    if (idx < 0)
+        idx = sz + idx;
+    if (idx < 0)
+        idx = 0;
+    if (idx >= sz) {
+        $(n)_append(self, elt);
+        return;
+    }
+    assert(idx >= 0 && idx < sz);
+
+    if (self->size == self->capacity) {
+        assert(self->capacity * 2 >= self->size + 1); // hopefully we're not creating any capacity-zero arrays...
+        i64 new_capacity = self->capacity * 2;
+        self->ptr = ($(e)*) my_realloc((char*)self->ptr, new_capacity * sizeof($(e)), "list_insert");
+        self->capacity = new_capacity;
+    }
+
+    memmove(self->ptr + idx + 1, self->ptr + idx, (sz - idx) * sizeof($(e)));
+    self->ptr[idx] = elt;
+    self->size++;
+
+    $(et.get_method_name(em, "__incref__"))(elt);
+}
+
+void $(n)_setitem_slice($(n)* self, slice* s, $(n)* rhs) {
+    i64 sz = self->size;
+
+    slice_iterator it;
+    parse_slice(s, sz, &it);
+    i64 num_old = sliceit_num_left(&it);
+
+    if (it.step != 1) {
+        assert(rhs->size == num_old); // Have to replace with the same number of elements
+
+        i64 idx = 0;
+        while (true) {
+            i64 cur = sliceit_get_next(&it);
+            if (cur == -1)
+                break;
+
+            assert(cur >= 0);
+            assert(cur < sz);
+
+            $(et.get_method_name(em, "__decref__"))(self->ptr[cur]);
+            self->ptr[cur] = rhs->ptr[idx];
+            $(et.get_method_name(em, "__incref__"))(self->ptr[cur]);
+            idx++;
+        }
+        assert(idx == rhs->size);
+        return;
+    }
+
+    i64 new_size = sz + rhs->size - num_old;
+    if (new_size > self->capacity) {
+        i64 new_capacity = self->capacity * 2;
+        if (new_size > new_capacity)
+            new_capacity = new_size;
+        self->ptr = ($(e)*) my_realloc((char*)self->ptr, new_capacity * sizeof($(e)), "list_setitem_slice");
+        self->capacity = new_capacity;
+    }
+
+    for (int i = it.cur; i < it.end; i++) {
+        $(et.get_method_name(em, "__decref__"))(self->ptr[i]);
+    }
+    memmove(self->ptr + it.end + rhs->size - num_old, self->ptr + it.end, (sz - it.end) * sizeof($(e)));
+
+    for (int i = 0; i < rhs->size; i++) {
+        $(e) e = self->ptr[it.cur + i] = rhs->ptr[i];
+        $(et.get_method_name(em, "__incref__"))(e);
+    }
+    self->size += rhs->size - num_old;
+}
+
+void $(n)_reverse($(n)* self) {
+    i64 sz = self->size;
+    for (int i = 0; i * 2 < sz - 1; i++) {
+        $(e) t = self->ptr[sz - 1 - i];
+        self->ptr[sz - 1 - i] = self->ptr[i];
+        self->ptr[i] = t;
+    }
+}
+
+i1 $(n)_nonzero($(n)* self) {
+    return (self != NULL) && (self->size > 0);
+}
+
+$$(if et.hasattr("__lt__"))
+i1 $(et.get_method_name(em, "__lt__"))($(e), $(e));
+void $(n)_sort($(n)* self) {
+    i64 sz = self->size;
+    for (int i = 0; i < sz; i++) {
+        for (int j = 0; j < sz - i - 1; j++) {
+            $$(t = Variable(et, "self->ptr[j+1]", 1, False).getattr(em, "__lt__").call(em, [Variable(et, "self->ptr[j]", 1, False)]))
+            if ($(t.v[1:])) {
+                $(e) t = self->ptr[j];
+                self->ptr[j] = self->ptr[j+1];
+                self->ptr[j+1] = t;
+            }
+        }
+    }
+}
+$$(endif)
+
+typedef void $(in_);
+void $(in_)_decref($(in_)*);
+i1 $(in_)_hasnext($(in_)*);
+$(et.c_type()) $(in_)_next($(in_)*);

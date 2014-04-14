@@ -1,0 +1,51 @@
+%$(n) = type opaque
+$(make_typeobj(em, n, n))
+$(make_typeobj(em, key_iter_name))
+$(make_typeobj(em, value_iter_name))
+$(make_typeobj(em, item_iter_name))
+declare %$(n)* @$(n)_ctor()
+declare void @$(n)_incref(%$(n)*)
+declare void @$(n)_decref(%$(n)*)
+declare $(v) @$(n)_get(%$(n)*, $(k), $(v))
+declare $(v) @$(n)_getitem(%$(n)*, $(k))
+declare void @$(n)_set(%$(n)*, $(k), $(v))
+declare %string* @$(n)_repr(%$(n)*)
+declare $(lv) @$(n)_values(%$(n)*)
+declare $(li) @$(n)_items(%$(n)*)
+declare i64 @$(n)_len(%$(n)*)
+declare i1 @$(n)_contains(%$(n)*, $(k))
+declare i1 @$(n)_nonzero(%$(n)*)
+declare $(v) @$(n)_setdefault(%$(n)*, $(k), $(v))
+
+%$(key_iter_name) = type opaque
+declare $(key_iter) @$(n)_iter(%$(n)*)
+declare void @$(key_iter_name)_incref(%$(key_iter_name)*)
+declare void @$(key_iter_name)_decref(%$(key_iter_name)*)
+declare i1 @$(key_iter_name)_hasnext(%$(key_iter_name)*)
+declare $(k) @$(key_iter_name)_next(%$(key_iter_name)*)
+define %$(key_iter_name)* @$(key_iter_name)_iter(%$(key_iter_name)* %self) {
+    call void @$(key_iter_name)_incref(%$(key_iter_name)* %self)
+    ret %$(key_iter_name)* %self
+}
+
+%$(value_iter_name) = type opaque
+declare $(value_iter) @$(n)_itervalues(%$(n)*)
+declare void @$(value_iter_name)_incref(%$(value_iter_name)*)
+declare void @$(value_iter_name)_decref(%$(value_iter_name)*)
+declare i1 @$(value_iter_name)_hasnext(%$(value_iter_name)*)
+declare $(v) @$(value_iter_name)_next(%$(value_iter_name)*)
+define %$(value_iter_name)* @$(value_iter_name)_iter(%$(value_iter_name)* %self) {
+    call void @$(value_iter_name)_incref(%$(value_iter_name)* %self)
+    ret %$(value_iter_name)* %self
+}
+
+%$(item_iter_name) = type opaque
+declare $(item_iter) @$(n)_iteritems(%$(n)*)
+declare void @$(item_iter_name)_incref(%$(item_iter_name)*)
+declare void @$(item_iter_name)_decref(%$(item_iter_name)*)
+declare i1 @$(item_iter_name)_hasnext(%$(item_iter_name)*)
+declare $(i) @$(item_iter_name)_next(%$(item_iter_name)*)
+define %$(item_iter_name)* @$(item_iter_name)_iter(%$(item_iter_name)* %self) {
+    call void @$(item_iter_name)_incref(%$(item_iter_name)* %self)
+    ret %$(item_iter_name)* %self
+}

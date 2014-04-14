@@ -1,0 +1,17 @@
+define $(r) @$(n)_call$(this_nargs)($(this_arg_string)) alwaysinline {
+$(CHECK_NONE)    %isnull = icmp eq %$(n)* %f, null
+$(CHECK_NONE)    br i1 %isnull, label %ifnull, label %ifnotnull
+$(CHECK_NONE)ifnull:
+$(CHECK_NONE)    call void @raise_called_none_error() noreturn
+$(CHECK_NONE)    unreachable
+
+ifnotnull:
+    %vtable_p = getelementptr inbounds %$(n)* %f, i32 0, i32 1
+    %vtable = load %$(n)_vtable** %vtable_p
+    %ptr_p = getelementptr inbounds %$(n)_vtable* %vtable, i32 0, i32 $(call_ptr_idx)
+    %func = load $(this_call_type)** %ptr_p
+
+    %r = call $(this_call_type)* %func($(this_arg_string))
+    ret $(r) %r
+}
+

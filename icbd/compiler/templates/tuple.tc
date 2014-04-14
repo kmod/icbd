@@ -1,0 +1,49 @@
+$("/*" if t.elt_types == (Int, Int) else "")
+typedef struct {
+    i64 nrefs;
+    $("\n    ".join(["%s elt%d;" % (e.c_type(), i) for i, e in enumerate(t.elt_types)]))
+} $(n);
+$("*/" if t.elt_types == (Int, Int) else "")
+
+$(n)* $(n)_ctor($(args));
+
+$(if all(e.hasattr("__eq__") for e in t.elt_types))
+$("\n".join(["i1 %s(%s, %s);" % (e.get_method_name(em, "__eq__"), e.c_type(), e.c_type()) for e in t.elt_types]))
+
+i1 $(n)_eq($(n)* lhs, $(n)* rhs) {
+    if (lhs == NULL)
+        return rhs == NULL;
+    if (rhs == NULL)
+        return false;
+
+    $("\n    ".join(["if (!%s(lhs->elt%d, rhs->elt%d)) return false;" % (e.get_method_name(em, "__eq__"), i, i) for i, e in enumerate(t.elt_types)]))
+    return true;
+}
+
+$(if all(e.hasattr("__lt__") for e in t.elt_types))
+
+$("\n".join(["i1 %s(%s, %s);" % (e.get_method_name(em, "__lt__"), e.c_type(), e.c_type()) for e in t.elt_types]))
+
+i1 $(n)_lt($(n)* lhs, $(n)* rhs) {
+    if (lhs == NULL)
+        return rhs != NULL;
+    if (rhs == NULL)
+        return false;
+
+    $$$(
+    for i, et in enumerate(t.elt_types):
+        lhs = Variable(et, "lhs->elt%d" % i, 1, False)
+        rhs = Variable(et, "rhs->elt%d" % i, 1, False)
+        rhs.incvref(em)
+        lt = lhs.getattr(em, "__lt__", decvref=False).call(em, [rhs])
+
+        em.pc("if (%s) return true;" % (lt.v[1:],))
+        rhs.incvref(em)
+        eq = lhs.getattr(em, "__eq__", decvref=False).call(em, [rhs])
+        em.pc("if (!(%s)) return false;" % (eq.v[1:],))
+    )$$$
+    return false;
+}
+
+$(endif)
+$(endif)

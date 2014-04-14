@@ -1,0 +1,67 @@
+; Structure is dtor, call types
+%$(n)_vtable = type {void (%$(n)*)*, $(call_types)}
+; Structure is refcount, vtable
+%$(n) = type {i64, %$(n)_vtable*}
+
+define i64 @$(n)_chref(%$(n)* %self, i64 %inc) {
+    %ref_ptr = getelementptr %$(n)* %self, i64 0, i32 0
+    %nrefs = load i64* %ref_ptr
+    %new_refs = add i64 %nrefs, %inc
+    store i64 %new_refs, i64* %ref_ptr
+    ret i64 %new_refs
+}
+
+define void @$(n)_incref(%$(n)* %self) {
+    %isnull = icmp eq %$(n)* %self, null
+    br i1 %isnull, label %ifnull, label %ifnotnull
+ifnull:
+    ret void
+
+ifnotnull:
+    %refs = call i64 @$(n)_chref(%$(n)* %self, i64 1)
+    ret void
+}
+
+define void @$(n)_decref(%$(n)* %self) {
+    %isnull = icmp eq %$(n)* %self, null
+    br i1 %isnull, label %ifnull, label %ifnotnull
+ifnull:
+    ret void
+
+ifnotnull:
+    %refs = call i64 @$(n)_chref(%$(n)* %self, i64 -1)
+    %unused = icmp sle i64 %refs, 0
+    br i1 %unused, label %dealloc, label %done
+dealloc:
+    %bad = icmp slt i64 %refs, 0
+    br i1 %bad, label %err, label %do_free
+do_free:
+    %vtable_p = getelementptr inbounds %$(n)* %self, i32 0, i32 1
+    %vtable = load %$(n)_vtable** %vtable_p
+    %dtor_p = getelementptr inbounds %$(n)_vtable* %vtable, i32 0, i32 0
+    %dtor_f = load void (%$(n)*)** %dtor_p
+    call void %dtor_f(%$(n)* %self)
+
+    %cast = bitcast %$(n)* %self to i8*
+    tail call void @my_free(i8* noalias nocapture %cast, i8* $(alloc_name)) nounwind
+    br label %done
+err:
+    call void @raise_over_free_error() noreturn
+    unreachable
+done:
+    ret void
+}
+
+define %string* @$(n)_repr(%$(n)* %self) {
+    %r = call %string* @func_repr()
+    ret %string* %r
+}
+
+define i1 @$(n)_eq(%$(n)* %self, %$(n)* %rhs) {
+    %r = icmp eq %$(n)* %self, %rhs
+    ret i1 %r
+}
+
+define i1 @$(n)_nonzero(%$(n)* %self) {
+    ret i1 true
+}

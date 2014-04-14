@@ -1,0 +1,35 @@
+*** lib/Analysis/MemoryBuiltins.cpp	2012-06-04 20:56:36.488132300 -0700
+***************
+*** 35,41 ****
+      return false;
+  
+    Function *Callee = CI->getCalledFunction();
+!   if (Callee == 0 || !Callee->isDeclaration() || Callee->getName() != "malloc")
+      return false;
+  
+    // Check malloc prototype.
+--- 35,41 ----
+      return false;
+  
+    Function *Callee = CI->getCalledFunction();
+!   if (Callee == 0 || !Callee->isDeclaration() || Callee->getName() != "my_malloc")
+      return false;
+  
+    // Check malloc prototype.
+***************
+*** 189,195 ****
+    if (!CI)
+      return 0;
+    Function *Callee = CI->getCalledFunction();
+!   if (Callee == 0 || !Callee->isDeclaration() || Callee->getName() != "free")
+      return 0;
+  
+    // Check free prototype.
+--- 189,195 ----
+    if (!CI)
+      return 0;
+    Function *Callee = CI->getCalledFunction();
+!   if (Callee == 0 || !Callee->isDeclaration() || Callee->getName() != "my_free")
+      return 0;
+  
+    // Check free prototype.

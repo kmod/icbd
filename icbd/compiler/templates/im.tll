@@ -1,0 +1,46 @@
+@$(n)_vtable = constant $(vtable_t) {void ($(callable_type))* @$(n)_dtor, $(call_type) bitcast ($(real_call_type) @$(n)_call to $(call_type))}
+%$(n) = type {i64, $(vtable_t)*, $(obj_type), $(func_type)}
+
+define $(callable_type) @$(n)_ctor($(obj_type) %o, $(func_type) %f) {
+    %sizeof_p = getelementptr %$(n)* null, i64 1
+    %sizeof = ptrtoint %$(n)* %sizeof_p to i64
+    %alloc = tail call noalias i8* @my_malloc(i64 %sizeof, i8* $(alloc_name)) nounwind
+    %made = bitcast i8* %alloc to %$(n)*
+
+    %ref_ptr = getelementptr %$(n)* %made, i64 0, i32 0
+    %vtable_ptr = getelementptr %$(n)* %made, i64 0, i32 1
+    %obj_ptr = getelementptr %$(n)* %made, i64 0, i32 2
+    %func_ptr = getelementptr %$(n)* %made, i64 0, i32 3
+
+    store i64 1, i64* %ref_ptr
+    store $(vtable_t)* @$(n)_vtable, $(vtable_t)** %vtable_ptr
+    store $(obj_type) %o, $(obj_type)* %obj_ptr
+    store $(func_type) %f, $(func_type)* %func_ptr
+
+    %rtn = bitcast %$(n)* %made to $(callable_type)
+    ret $(callable_type) %rtn
+}
+
+define $(r) @$(n)_call($(def_args)) alwaysinline {
+    %o_p = getelementptr inbounds %$(n)* %self, i32 0, i32 2
+    %f_p = getelementptr inbounds %$(n)* %self, i32 0, i32 3
+    %o = load $(obj_type)* %o_p
+    %f = load $(func_type)* %f_p
+
+    $$$(
+    args = [Variable(ot, "%o", 1, False)] + [Variable(a, "%%v%d" % i, 1, False) for i, a in enumerate(bound_args)]
+    rtn = Variable(ft, ("%f", [], None), 1, False).call(em, args)
+    )$$$
+    ret $(r) $(rtn.v)
+}
+
+define void @$(n)_dtor($(callable_type) %_self) {
+    %self = bitcast $(callable_type) %_self to %$(n)*
+    %o_p = getelementptr inbounds %$(n)* %self, i32 0, i32 2
+    %f_p = getelementptr inbounds %$(n)* %self, i32 0, i32 3
+    %o = load $(obj_type)* %o_p
+    %f = load $(func_type)* %f_p
+    $(o_decref)
+    $(f_decref)
+    ret void
+}

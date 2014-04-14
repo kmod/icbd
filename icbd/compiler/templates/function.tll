@@ -1,0 +1,44 @@
+@$(n)_vtable = constant $(vtable_t) {void ($(callable_type))* @$(n)_dtor, $(call_funcs)}
+%$(n) = type {i64, $(vtable_t)*, $(func_type) $(closure_def_type) $(default_types) }
+
+define internal $(callable_type) @$(n)_ctor($(func_type) %f
+        $(IFCLOSURE) , $(closure_type) %closure
+        $(defaults_argstr)
+    ) {
+    %sizeof_p = getelementptr %$(n)* null, i64 1
+    %sizeof = ptrtoint %$(n)* %sizeof_p to i64
+    %malloc = tail call noalias i8* @my_malloc(i64 %sizeof, i8* $(alloc_name)) nounwind
+    %made = bitcast i8* %malloc to %$(n)*
+
+    %ref_ptr = getelementptr %$(n)* %made, i64 0, i32 0
+    store i64 1, i64* %ref_ptr
+
+    %vtable_ptr = getelementptr %$(n)* %made, i64 0, i32 1
+    store $(vtable_t)* @$(n)_vtable, $(vtable_t)** %vtable_ptr
+
+    %func_ptr = getelementptr %$(n)* %made, i64 0, i32 2
+    store $(func_type) %f, $(func_type)* %func_ptr
+
+    $(IFCLOSURE) %closure_ptr = getelementptr %$(n)* %made, i64 0, i32 3
+    $(IFCLOSURE) store $(closure_type) %closure, $(closure_type)* %closure_ptr
+    $(IFCLOSURE) $(closure_incref)
+
+    $(store_defaults)
+
+    %rtn = bitcast %$(n)* %made to $(callable_type)
+    ret $(callable_type) %rtn
+}
+
+define internal void @$(n)_dtor($(callable_type) %_self) alwaysinline {
+    %self = bitcast $(callable_type) %_self to %$(n)*
+
+    $(IFCLOSURE) %c_p = getelementptr inbounds %$(n)* %self, i32 0, i32 3
+    $(IFCLOSURE) %closure = load $(closure_type)* %c_p
+    $(IFCLOSURE) $(closure_decref)
+
+    $(decref_defaults)
+
+    ret void
+}
+
+

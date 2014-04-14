@@ -1,0 +1,2 @@
+def glob(s):
+    return [""]
