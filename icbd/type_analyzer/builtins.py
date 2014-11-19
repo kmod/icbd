@@ -321,7 +321,7 @@ BUILTINS['filter'] = Union(SpecialFunction(_filter_rtn))
 def _reduce_rtn(args, keywords, starargs, context, dryrun, orig_args):
     assert not keywords
     assert not starargs
-    assert len(args) == 3
+    assert len(args) == 3, args
 
     f, l, initial = args
 
