@@ -60,7 +60,7 @@ if __name__ == "__main__":
         elif n == "-c":
             plugins.append(v)
         elif n == "-E":
-            exclude_dirs.append(v)
+            exclude_dirs.append(os.path.abspath(v))
         else:
             raise Exception(n)
 
